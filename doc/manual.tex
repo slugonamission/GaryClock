@@ -1,11 +1,184 @@
-\documentclass{article}
-\title{The Gary Clock Manual}
-\author{The ToucHMore Person Foundation}
+\documentclass[11pt,a4paper,twoside,titlepage]{scrartcl}
+
+\usepackage[%
+  includeheadfoot,
+  headheight=44pt,
+  headsep=60pt,
+  hmargin=2cm,
+  top=1cm,
+  bottom=1.4cm
+]{geometry}
+\usepackage[pagestyles,raggedright]{titlesec}
+\usepackage{lastpage,multirow,tabularx}
+\usepackage{graphicx}
+\usepackage{appendix}
+\usepackage{lipsum}
+\usepackage[pdfusetitle,hidelinks]{hyperref}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{todonotes}
+
+\usepackage{float}
+\restylefloat{table}
+
+\usepackage{datetime}
+\ddmmyyyydate
+
+
+\interfootnotelinepenalty=9999
+
+\lstset{ %
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it's 1 each line will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,                   % adds a frame around the code (tb for top bottom)
+tabsize=4,                      % sets default tabsize to 2 spaces
+captionpos=b,                   % sets the caption-position to bottom
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)}          % if you want to add a comment within your code
+}
+
+\title{\vspace{-24pt}\Huge Multi-Function Analogue Clock}
+\subtitle{\vspace{8pt}\LARGE User Manual}
+\author{}
+\date{\vspace{12pt}\missingfigure{Beautiful illustration of the finished clock}}
+
+\renewcommand{\tablename}{\textbf{Tip}}
+\renewcommand{\figurename}{\textbf{Warning}}
+
+\newcommand{\clock}{MULTI-FUNCTION~ANALOGUE~CLOCK}
+
+\makeatletter
+\let\Title\@title
+\let\Author\@author
+\let\Date\@date
+\makeatother
+
+
+% Page setup (titlesec)
+\newpagestyle{manual}{%
+%  \widenhead[1cm][1cm][1cm][1cm]
+  \widenhead*{1cm}{1cm}
+  \sethead[][\begin{tabularx}{\linewidth}{|>{\centering}p{4cm}|>{\centering}X|p{4cm}|}\hline
+               & & \multirow{6}{*}{\includegraphics[width=4cm]{images/rtsyork.pdf}} \\
+               User Manual & \textbf{\MakeUppercase{MULTI-FUNCTION ANALOGUE CLOCK}} & \\
+               & & \\ \cline{1-2}
+               & & \\
+               Page \thepage\ of \pageref{LastPage} & Department of Computer Science, University of York & \\
+               & & \\ \hline
+             \end{tabularx}][]
+          {}{\begin{tabularx}{\linewidth}{|p{4cm}|>{\centering}X|>{\centering\arraybackslash}p{4cm}|}\hline
+               \multirow{6}{*}{\includegraphics[width=4cm]{images/rtsyork.pdf}} & & \\
+               & \textbf{\MakeUppercase{MULTI-FUNCTION ANALOGUE CLOCK}} & User Manual \\
+               & & \\ \cline{2-3}
+               & & \\
+               & Department of Computer Science, University of York & Page \thepage\ of \pageref{LastPage} \\
+               & & \\ \hline
+             \end{tabularx}}{}
+  \setfoot[][\begin{tabularx}{\linewidth}{|p{3cm}|p{3cm}|X|}\hline
+               Edition: 1 & Revision: A & \multirow{2}{*}{Approved: \textit{RJ, MF, IG, GL, JG}} \\
+               Date: \today & Date: \today & \\\hline
+             \end{tabularx}][]
+          {}{\begin{tabularx}{\linewidth}{|p{3cm}|p{3cm}|X|}\hline
+               Edition: 1 & Revision: A & \multirow{2}{*}{Approved: \textit{RJ, MF, IG, GL, JG}} \\
+               Date: \today & Date: \today & \\\hline
+             \end{tabularx}}{}
+}
+\pagestyle{manual}
 
 \begin{document}
-\maketitle
-\section{LOL}
-\label{sect:lol}
-Hello World!
-\end{document}
 
+\maketitle
+
+
+\section{Introduction}
+\input{sections/intro.tex}
+
+\clearpage
+\section{Important Safety Information}
+\input{sections/safety.tex}
+
+\clearpage
+\section{Basic Operation}
+\input{sections/basic.tex}
+
+\clearpage
+\section{Advanced Functionality}
+\input{sections/advanced.tex}
+
+
+\clearpage
+\appendix
+\appendixpage
+
+\input{sections/appendices.tex}
+
+\clearpage
+\section{Notes}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+
+
+\clearpage
+\section{More Notes}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.2pt}
+\vspace{1cm}
+
+
+\end{document}
