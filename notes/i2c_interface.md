@@ -1,7 +1,7 @@
 Gary Clock I2C Semantics
 ==========================
 + The programmer will connect over I2C as a *slave* device.
-+ + The clock will already be an I2C master to communicate with the RTC.
+    + The clock will already be an I2C master to communicate with the RTC.
 + In order to signal connection, the programmer will bring pin XX low (tie to GND). This pin **must** be configured as PULLUP within the Arduino.
 + The programmer will have slave ID XYZ.
 + On connection, the clock must send a transaction to set the current time to the programmer. The programmer will not start unless this is sent.
