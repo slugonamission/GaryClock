@@ -8,5 +8,5 @@ Gary Clock I2C Semantics
 + The transaction format is `<regnum><data1><data2>...<datan>`. Writes to different registers **must** be contained in seperate transactions. Transaction splitting is not supported.
 + The register file is as follows:
 
-    RegNum         Dir          Data
-    0              R/W          The current time of the format <hour><min><second>, all as seperate 8 bit words.
+        RegNum         Dir          Data
+        0              R/W          The current time of the format <hour><min><second>, all as seperate 8 bit words.
