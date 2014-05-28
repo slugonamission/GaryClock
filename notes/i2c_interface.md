@@ -10,3 +10,9 @@ Gary Clock I2C Semantics
 
         RegNum         Dir          Data
         0              R/W          The current time of the format <hour><min><second>, all as seperate 8 bit words.
+
++ Current I2C layout map:
+
+        Addr          Usage
+        0x68          RTC
+        0x70 - 0x77   7-seg display
