@@ -481,6 +481,7 @@ void Adafruit_GFX::drawFastHLine(int16_t x, int16_t y,
   drawLine(x, y, x+w-1, y, color);
 }
 
+
 void Adafruit_GFX::fillRect(int16_t x, int16_t y, int16_t w, int16_t h,
 			    uint16_t color) {
   // Update in subclasses if desired!

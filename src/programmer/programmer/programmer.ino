@@ -3,6 +3,10 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_ST7735.h"
 
+// !!! IMPORTANT !!!
+// IF THIS IS DEFINED, ADD ~5kB ONTO THE PROGRAM SIZE!
+//#define SKIP_SHIT
+
 #define TFT_CS 10
 #define TFT_DC 8
 #define TFT_RST NULL
@@ -31,8 +35,10 @@ char* stringTab[] = {
 // Menu stuff
 char* menuTab[] = {
   "Set Time",
-  "Reset Time",
-  "Set Again",
+  "Set LEDs",
+  "Set Brightness",
+  "Flappy Plumbridge",
+  "Credits",
   NULL
 };
 
@@ -41,6 +47,12 @@ int selectedItem = 0;
 // Page config
 int curPage = 0;
 #define PAGE_MENU 0
+#define PAGE_TIME 1
+#define PAGE_LEDS 255
+#define PAGE_BRIGHTNESS 3
+#define PAGE_FLAPPY 255
+#define PAGE_CREDITS 255
+#define PAGE_UNDEFINED 255
 
 // Joystick
 char keydown = 0;
@@ -55,11 +67,37 @@ char keydown = 0;
 void writeOK();
 void writeFail();
 void drawPBM(char* filename, const int width, const int height, const int xOff, const int yOff);
+
+// Menu page
 void printMenuHeader();
 void printMenu();
-
 void loopMenu();
 
+// ----------------------------------------
+// Time page
+#define TIMESEG_HOUR 0
+#define TIMESEG_MIN 1
+#define TIMESEG_SEC 2
+#define TIMESEG_BACK 3
+
+void printTimeHeader();
+void printTime();
+void loopTime();
+unsigned char timeSelectedSegment = TIMESEG_HOUR;
+unsigned char timeCurrent[3] = {0, 0, 0};
+
+// -----------------------------------------
+// Brightness page
+void printBrightnessHeader();
+void loopBrightness();
+unsigned char curBrightness = 255;
+
+// -----------------------------------------
+// Undefined page
+void printUndefinedHeader();
+void loopUndefined();
+
+// Joystick helper
 char getJoyDir();
 
 // The actual screen...
@@ -119,7 +157,7 @@ void printMenuHeader()
   
   tft.setCursor(30, 0);
   tft.println("ToucHMore Remote");
-  tft.drawLine(0, 10, 160, 10, ST7735_YELLOW);
+  tft.drawFastHLine(0, 10, 160, ST7735_YELLOW);
   tft.setCursor(0, 15);
 }
 
@@ -187,6 +225,7 @@ void setup()
   
   int curStrIdx = 0;
   
+#ifndef SKIP_SHIT
   while(stringTab[curStrIdx] != 0)
   {
     tft.print(stringTab[curStrIdx]);
@@ -198,7 +237,6 @@ void setup()
       }
       else
       {
-        tft.setTextColor(ST7735_RED);
         writeFail();
         tft.println();
         tft.print("!!! HALT !!!");
@@ -219,7 +257,7 @@ void setup()
   }
   
   delay(10000);
-  
+#endif
   printMenuHeader();
   printMenu();
 }
@@ -269,8 +307,12 @@ void loop()
 {
   if(curPage == PAGE_MENU)
     loopMenu();
-  
-  int x;
+  if(curPage == PAGE_TIME)
+    loopTime();
+  if(curPage == PAGE_BRIGHTNESS)
+    loopBrightness();
+  if(curPage == PAGE_UNDEFINED)
+    loopUndefined();
 }
 
 void loopMenu()
@@ -280,4 +322,189 @@ void loopMenu()
     selectItem(selectedItem + 1);
   else if(dir == JOY_UP)
     selectItem(selectedItem - 1);
+  else if(dir == JOY_PRESS)
+  {
+    switch(selectedItem)
+    {
+      case 0:
+        printTimeHeader();
+        curPage = PAGE_TIME;
+        break;
+        
+      case 2:
+       printBrightnessHeader();
+       curPage = PAGE_BRIGHTNESS;
+       break;
+       
+     default:
+       printUndefinedHeader();
+       curPage = PAGE_UNDEFINED;
+       break;
+    }
+  }
+}
+
+// -------------------------------------------------
+
+void printTimeHeader()
+{
+  tft.fillScreen(ST7735_BLACK);
+  
+  tft.setCursor(50, 0);
+  tft.println("Time Config");
+  tft.drawFastHLine(0, 10, 160, ST7735_YELLOW);
+  tft.setCursor(0, 15);
+  
+  printTime();
+}
+
+void printTime()
+{
+  tft.setCursor(55, 30);
+  
+  // Hours...
+  if(timeSelectedSegment == TIMESEG_HOUR)
+    tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+  if(timeCurrent[0] < 10)
+    tft.write('0');
+  tft.print(timeCurrent[0]);
+  
+  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+  tft.write(':');
+  
+  // Minutes...
+  if(timeSelectedSegment == TIMESEG_MIN)
+    tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+  if(timeCurrent[1] < 10)
+    tft.write('0');
+  tft.print(timeCurrent[1]);
+  
+  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+  tft.write(':');
+  
+  // Seconds...
+  if(timeSelectedSegment == TIMESEG_SEC)
+    tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+  if(timeCurrent[2] < 10)
+    tft.write('0');
+  tft.print(timeCurrent[2]);
+  
+  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+  
+  tft.setCursor(55, 60);
+  
+  if(timeSelectedSegment == TIMESEG_BACK)
+    tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+  tft.print("<<< Back");
+  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+}
+
+void loopTime()
+{
+  char dir = getJoyDir();
+  
+  if(dir == JOY_LEFT)
+  {
+    timeSelectedSegment--;
+    printTime();
+  }
+  
+  if(dir == JOY_RIGHT)
+  {
+    timeSelectedSegment++;
+    printTime();
+  }
+  
+  if(dir == JOY_UP && timeSelectedSegment <= TIMESEG_SEC)
+  {
+    if(timeSelectedSegment == TIMESEG_HOUR && timeCurrent[timeSelectedSegment] == 11)
+      timeCurrent[timeSelectedSegment] = 0;
+    else if(timeCurrent[timeSelectedSegment] == 59)
+      timeCurrent[timeSelectedSegment] = 0;
+    else
+      timeCurrent[timeSelectedSegment]++;
+    printTime();
+  }
+  
+  if(dir == JOY_DOWN && timeSelectedSegment <= TIMESEG_SEC)
+  {
+    if(timeCurrent[timeSelectedSegment] == 0)
+    {
+      if(timeSelectedSegment == TIMESEG_HOUR)
+        timeCurrent[timeSelectedSegment] = 11;
+      else
+        timeCurrent[timeSelectedSegment] = 59;
+    }
+    else
+      timeCurrent[timeSelectedSegment]--;
+    printTime();
+  }
+  
+  if(dir == JOY_PRESS && timeSelectedSegment == TIMESEG_BACK)
+  {
+    curPage = PAGE_MENU;
+    printMenuHeader();
+    printMenu();
+  }
+}
+
+// -------------------------------------------------
+
+void printBrightnessHeader()
+{
+  tft.fillScreen(ST7735_BLACK);
+  
+  tft.setCursor(50, 0);
+  tft.println("Brightness");
+  tft.drawFastHLine(0, 10, 160, ST7735_YELLOW);
+  tft.setCursor(0, 15);
+  tft.println(curBrightness);
+}
+
+void loopBrightness()
+{
+  char dir = getJoyDir();
+  if(dir == JOY_UP)
+  {
+    curBrightness += 10;
+    analogWrite(TFT_BACKLIGHT, curBrightness);
+    tft.setCursor(0, 15);
+    tft.println(curBrightness);
+  }
+  else if(dir == JOY_DOWN)
+  {
+    curBrightness -= 10;
+    analogWrite(TFT_BACKLIGHT, curBrightness);
+    tft.setCursor(0, 15);
+    tft.println(curBrightness);
+  }
+  else if(dir == JOY_LEFT)
+  {
+    curPage = PAGE_MENU;
+    printMenuHeader();
+    printMenu();
+  }
+}
+
+// -------------------------------------------------------
+void printUndefinedHeader()
+{
+  tft.fillScreen(ST7735_BLACK);
+  
+  tft.setCursor(50, 0);
+  tft.println("UNDEFINED");
+  tft.drawFastHLine(0, 10, 160, ST7735_RED);
+  tft.setCursor(0, 50);
+  tft.println("This page does not exist yet. Please press left to return.");
+}
+
+void loopUndefined()
+{
+  char dir = getJoyDir();
+  if(dir == JOY_LEFT)
+  {
+    curPage = PAGE_MENU;
+    printMenuHeader();
+    printMenu();
+  }
 }
