@@ -7,6 +7,7 @@
 // IF THIS IS DEFINED, ADD ~5kB ONTO THE PROGRAM SIZE!
 //#define SKIP_SHIT
 
+// TFT pins
 #define TFT_CS 10
 #define TFT_DC 8
 #define TFT_RST NULL
@@ -15,6 +16,13 @@
 #define TFT_CLK 13
 #define TFT_BACKLIGHT 9
 
+// TFT default colours
+#define TEXTCOL ST7735_WHITE     // Standard text colour
+#define TEXTBG  ST7735_BLACK     // Standard text BG
+#define SELTEXTCOL ST7735_BLACK  // Selected text colour
+#define SELTEXTBG  ST7735_YELLOW // Selected text background
+
+// SD special pins
 #define SD_CS 4
 
 // Do we have an SD card or not?
@@ -62,6 +70,7 @@ char keydown = 0;
 #define JOY_RIGHT 3
 #define JOY_DOWN 4
 #define JOY_PRESS 5
+char getJoyDir();
 
 // Forward method decls.
 void writeOK();
@@ -97,8 +106,6 @@ unsigned char curBrightness = 255;
 void printUndefinedHeader();
 void loopUndefined();
 
-// Joystick helper
-char getJoyDir();
 
 // The actual screen...
 Adafruit_ST7735 tft(TFT_CS, TFT_DC, TFT_MOSI, TFT_CLK, TFT_RST);
@@ -157,7 +164,7 @@ void printMenuHeader()
   
   tft.setCursor(30, 0);
   tft.println("ToucHMore Remote");
-  tft.drawFastHLine(0, 10, 160, ST7735_YELLOW);
+  tft.drawFastHLine(0, 10, 160, SELTEXTBG);
   tft.setCursor(0, 15);
 }
 
@@ -169,9 +176,9 @@ void printMenu()
   while(menuTab[menuIndex] != 0)
   {
     if(menuIndex == selectedItem)
-      tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+      tft.setTextColor(SELTEXTCOL, SELTEXTBG);
     else
-      tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+      tft.setTextColor(TEXTCOL, TEXTBG);
     tft.println(menuTab[menuIndex++]);
   }
 }
@@ -187,7 +194,7 @@ void writeOK()
   tft.write('[');
   tft.setTextColor(ST7735_GREEN);
   tft.print("OK");
-  tft.setTextColor(ST7735_WHITE);
+  tft.setTextColor(TEXTCOL);
   tft.write(']');
 }
 
@@ -196,7 +203,7 @@ void writeFail()
   tft.write('[');
   tft.setTextColor(ST7735_RED);
   tft.print("FAIL");
-  tft.setTextColor(ST7735_WHITE);
+  tft.setTextColor(TEXTCOL);
   tft.write(']');
 }
 
@@ -208,7 +215,7 @@ void setup()
   
   tft.initR(INITR_BLACKTAB);
   tft.fillScreen(ST7735_MAGENTA);
-  tft.fillScreen(ST7735_BLACK);
+  tft.fillScreen(TEXTBG);
   tft.setRotation(3);
   
   // Init SD card...
@@ -352,7 +359,7 @@ void printTimeHeader()
   
   tft.setCursor(50, 0);
   tft.println("Time Config");
-  tft.drawFastHLine(0, 10, 160, ST7735_YELLOW);
+  tft.drawFastHLine(0, 10, 160, SELTEXTBG);
   tft.setCursor(0, 15);
   
   printTime();
@@ -364,39 +371,39 @@ void printTime()
   
   // Hours...
   if(timeSelectedSegment == TIMESEG_HOUR)
-    tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+    tft.setTextColor(SELTEXTCOL, SELTEXTBG);
   if(timeCurrent[0] < 10)
     tft.write('0');
   tft.print(timeCurrent[0]);
   
-  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+  tft.setTextColor(TEXTCOL, TEXTBG);
   tft.write(':');
   
   // Minutes...
   if(timeSelectedSegment == TIMESEG_MIN)
-    tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+    tft.setTextColor(SELTEXTCOL, SELTEXTBG);
   if(timeCurrent[1] < 10)
     tft.write('0');
   tft.print(timeCurrent[1]);
   
-  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+  tft.setTextColor(TEXTCOL, TEXTBG);
   tft.write(':');
   
   // Seconds...
   if(timeSelectedSegment == TIMESEG_SEC)
-    tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+    tft.setTextColor(SELTEXTCOL, SELTEXTBG);
   if(timeCurrent[2] < 10)
     tft.write('0');
   tft.print(timeCurrent[2]);
   
-  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+  tft.setTextColor(TEXTCOL, TEXTBG);
   
   tft.setCursor(55, 60);
   
   if(timeSelectedSegment == TIMESEG_BACK)
-    tft.setTextColor(ST7735_BLACK, ST7735_YELLOW);
+    tft.setTextColor(SELTEXTCOL, SELTEXTBG);
   tft.print("<<< Back");
-  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+  tft.setTextColor(TEXTCOL, TEXTBG);
 }
 
 void loopTime()
@@ -452,11 +459,11 @@ void loopTime()
 
 void printBrightnessHeader()
 {
-  tft.fillScreen(ST7735_BLACK);
+  tft.fillScreen(TEXTBG);
   
   tft.setCursor(50, 0);
   tft.println("Brightness");
-  tft.drawFastHLine(0, 10, 160, ST7735_YELLOW);
+  tft.drawFastHLine(0, 10, 160, SELTEXTBG);
   tft.setCursor(0, 15);
   tft.println(curBrightness);
 }
@@ -489,7 +496,7 @@ void loopBrightness()
 // -------------------------------------------------------
 void printUndefinedHeader()
 {
-  tft.fillScreen(ST7735_BLACK);
+  tft.fillScreen(TEXTBG);
   
   tft.setCursor(50, 0);
   tft.println("UNDEFINED");
