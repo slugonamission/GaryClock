@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <SD.h>
+#include <Wire.h>
 #include "Adafruit_GFX.h"
 #include "Adafruit_ST7735.h"
 
@@ -25,6 +26,14 @@
 // SD special pins
 #define SD_CS 4
 
+// I2C address in 7-bit format
+#define I2C_ADDR 0x28
+
+// Because Adafruit don't actually say the font dimensions, and instead
+// just scatter magic bloody numbers everywhere...
+#define FONT_WIDTH 6
+#define FONT_HEIGHT 8
+
 // Do we have an SD card or not?
 int sd_card = 0;
 
@@ -47,6 +56,7 @@ char* menuTab[] = {
   "Set Brightness",
   "Flappy Plumbridge",
   "Credits",
+  "Quiz",
   NULL
 };
 
@@ -58,8 +68,9 @@ int curPage = 0;
 #define PAGE_TIME 1
 #define PAGE_LEDS 255
 #define PAGE_BRIGHTNESS 3
-#define PAGE_FLAPPY 255
-#define PAGE_CREDITS 255
+#define PAGE_FLAPPY 4
+#define PAGE_CREDITS 5
+#define PAGE_QUIZ 6
 #define PAGE_UNDEFINED 255
 
 // Joystick
@@ -100,6 +111,32 @@ unsigned char timeCurrent[3] = {0, 0, 0};
 void printBrightnessHeader();
 void loopBrightness();
 unsigned char curBrightness = 255;
+
+// -----------------------------------------
+// Flappy Plumbridge
+void printFlappyHeader();
+void loopFlappy();
+
+// -----------------------------------------
+// Credits page
+void printCreditsHeader();
+void loopCredits();
+
+// -----------------------------------------
+// Quiz page
+void printQuizHeader();
+void printQuestion();
+void loopQuiz();
+void selectAnswer(int ans);
+void checkAnswer();
+int questionNo = 0;
+int selectedAnswer = 0;
+int correctAnswer = 0;
+
+File questionFile;
+bool questionFileOpen = false;
+
+#define QUIZANS_TOP 54
 
 // -----------------------------------------
 // Undefined page
@@ -158,37 +195,6 @@ void drawPBM(char* filename, const int width, const int height, const int xOff, 
    f.close();
 }
 
-void printMenuHeader()
-{
-  tft.fillScreen(ST7735_BLACK);
-  
-  tft.setCursor(30, 0);
-  tft.println("ToucHMore Remote");
-  tft.drawFastHLine(0, 10, 160, SELTEXTBG);
-  tft.setCursor(0, 15);
-}
-
-void printMenu()
-{
-  int menuIndex = 0;
-  tft.setCursor(0, 15);
-  
-  while(menuTab[menuIndex] != 0)
-  {
-    if(menuIndex == selectedItem)
-      tft.setTextColor(SELTEXTCOL, SELTEXTBG);
-    else
-      tft.setTextColor(TEXTCOL, TEXTBG);
-    tft.println(menuTab[menuIndex++]);
-  }
-}
-
-void selectItem(int item)
-{
-  selectedItem = item;
-  printMenu();
-}
-
 void writeOK()
 {
   tft.write('[');
@@ -207,6 +213,14 @@ void writeFail()
   tft.write(']');
 }
 
+void i2c_recv(int numBytes)
+{
+}
+
+void i2c_trans()
+{
+}
+
 void setup()
 {
   pinMode(TFT_BACKLIGHT, OUTPUT);
@@ -217,6 +231,10 @@ void setup()
   tft.fillScreen(ST7735_MAGENTA);
   tft.fillScreen(TEXTBG);
   tft.setRotation(3);
+  
+  Wire.begin(I2C_ADDR);
+  Wire.onReceive(i2c_recv);
+  Wire.onRequest(i2c_trans);
   
   // Init SD card...
   // Check for SD Card
@@ -235,14 +253,14 @@ void setup()
 #ifndef SKIP_SHIT
   while(stringTab[curStrIdx] != 0)
   {
+    tft.setCursor(0, curStrIdx * FONT_HEIGHT);
     tft.print(stringTab[curStrIdx]);
+
+    tft.setCursor(160 - (4*FONT_WIDTH), curStrIdx * FONT_HEIGHT);    
     
     if(curStrIdx == SDLINE)
     {
-      if(sd_card)
-      {
-      }
-      else
+      if(!sd_card)
       {
         writeFail();
         tft.println();
@@ -259,11 +277,22 @@ void setup()
     }
     
     delay(2000);
-    tft.println();
     curStrIdx++;
   }
   
-  delay(10000);
+  for(int i = 255; i >= 0; i--)
+  {
+    analogWrite(TFT_BACKLIGHT, i);
+    delay(6);
+  }
+  
+  for(int i = 0; i < 256; i++)
+  {
+    analogWrite(TFT_BACKLIGHT, i);
+    delay(6);
+  }
+  
+  delay(5000);
 #endif
   printMenuHeader();
   printMenu();
@@ -282,7 +311,6 @@ char getJoyDir()
   }
   else if ((x < 200) & (keydown==0)) {
     // Up
-    // move up one menu item, if at top wrap to bottom
     keydown=1;
     return JOY_UP;
   }
@@ -293,7 +321,6 @@ char getJoyDir()
   }
   else if ((x < 600) & (keydown==0)){
     // Down
-    // move down one menu item, if at bottom wrap to top
     keydown=1;
     return JOY_DOWN;
   }
@@ -318,8 +345,57 @@ void loop()
     loopTime();
   if(curPage == PAGE_BRIGHTNESS)
     loopBrightness();
+  if(curPage == PAGE_FLAPPY)
+    loopFlappy();
+  if(curPage == PAGE_CREDITS)
+    loopCredits();
+  if(curPage == PAGE_QUIZ)
+    loopQuiz();
   if(curPage == PAGE_UNDEFINED)
     loopUndefined();
+}
+
+// --------------------------------------------------
+void printMenuHeader()
+{
+  tft.fillScreen(ST7735_BLACK);
+  
+  tft.setCursor(30, 0);
+  tft.println("ToucHMore Remote");
+  tft.drawFastHLine(0, 10, 160, SELTEXTBG);
+  tft.setCursor(0, 15);
+}
+
+void selectItem(int item)
+{
+  // Highlight new one...
+  tft.setCursor(0, 15 + (FONT_HEIGHT * item));
+  tft.setTextColor(SELTEXTCOL, SELTEXTBG);
+  tft.print(menuTab[item]);
+  
+  // Blank the previous item
+  tft.setCursor(0, 15 + (FONT_HEIGHT * selectedItem));
+  tft.setTextColor(TEXTCOL, TEXTBG);
+  tft.print(menuTab[selectedItem]);
+  
+  selectedItem = item;
+}
+
+void printMenu()
+{
+  int menuIndex = 0;
+  tft.setCursor(0, 15);
+  
+  tft.setTextColor(TEXTCOL);
+  
+  while(menuTab[menuIndex] != 0)
+  {
+    if(menuIndex == selectedItem)
+      tft.setTextColor(SELTEXTCOL, SELTEXTBG);
+    else
+      tft.setTextColor(TEXTCOL);
+    tft.println(menuTab[menuIndex++]);
+  }
 }
 
 void loopMenu()
@@ -341,6 +417,21 @@ void loopMenu()
       case 2:
        printBrightnessHeader();
        curPage = PAGE_BRIGHTNESS;
+       break;
+       
+     case 3:
+       printFlappyHeader();
+       curPage = PAGE_FLAPPY;
+       break;
+       
+     case 4:
+       printCreditsHeader();
+       curPage = PAGE_CREDITS;
+       break;
+       
+     case 5:
+       printQuizHeader();
+       curPage = PAGE_QUIZ;
        break;
        
      default:
@@ -490,6 +581,169 @@ void loopBrightness()
     curPage = PAGE_MENU;
     printMenuHeader();
     printMenu();
+  }
+}
+
+// -------------------------------------------------------
+void printFlappyHeader()
+{
+  tft.fillScreen(TEXTBG);
+  
+  tft.setCursor(35, 0);
+  tft.println("Flappy Plumbridge");
+  tft.drawFastHLine(0, 10, 160, SELTEXTBG);
+  
+  tft.fillRect(15, 15, 10, 50, ST7735_GREEN);
+  tft.fillRect(15, 85, 10, 43, ST7735_CYAN);
+  
+  tft.setCursor(15, 65);
+  tft.println("NOT IMPLEMENTED YET");
+}
+
+void loopFlappy()
+{
+  char dir = getJoyDir();
+  if(dir == JOY_LEFT)
+  {
+    curPage = PAGE_MENU;
+    printMenuHeader();
+    printMenu();
+  }
+}
+
+// -------------------------------------------------------
+void printCreditsHeader()
+{
+  tft.fillScreen(TEXTBG);
+  drawPBM("neil.pbm", 160, 107, 0, 10);
+}
+
+void loopCredits()
+{
+  char dir = getJoyDir();
+  if(dir == JOY_LEFT)
+  {
+    curPage = PAGE_MENU;
+    printMenuHeader();
+    printMenu();
+  }
+}
+
+// -------------------------------------------------------
+void printQuizHeader()
+{
+  tft.fillScreen(TEXTBG);
+  
+  tft.setCursor(60, 0);
+  tft.println("Quiz!");
+  tft.drawFastHLine(0, 10, 160, SELTEXTBG);
+  printQuestion();
+}
+
+void printQuestion()
+{
+  char c;
+  int readA = 0;
+  
+  tft.setCursor(0, 16);
+  
+  if(!questionFileOpen)
+  {
+    questionFile = SD.open("quiz.txt", FILE_READ);
+    if(!questionFile)
+    {
+      tft.println("Could not open quiz.txt");
+      return;
+    }
+    questionFileOpen = true;
+  }
+ 
+  while((c = questionFile.read()) != '\n')
+    tft.print(c);
+    
+  tft.setCursor(0, QUIZANS_TOP);
+  tft.print("  ");
+  
+  while(readA != 4)
+  {
+    c = questionFile.read();
+    if(c == '*')
+    {
+      correctAnswer = readA;
+      continue;
+    }
+    
+    if(c == '\n')
+    {
+      tft.print("\n  ");
+      readA++;
+      continue;
+    }
+    
+    tft.print(c);
+  }
+  
+  selectAnswer(0);
+}
+
+void selectAnswer(int ans)
+{
+  tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+  tft.setCursor(0, QUIZANS_TOP + (FONT_HEIGHT*selectedAnswer));
+  tft.print("  ");
+  tft.setCursor(0, QUIZANS_TOP + (FONT_HEIGHT*ans));
+  tft.print("->");
+  tft.setTextColor(ST7735_WHITE);
+  
+  selectedAnswer = ans;
+}
+
+void checkAnswer()
+{
+  tft.setCursor(40, 120);
+  if(selectedAnswer == correctAnswer)
+  {
+    tft.setTextColor(ST7735_BLACK, ST7735_GREEN);
+    tft.print("CORRECT");
+  }
+  else
+  {
+    tft.setTextColor(ST7735_BLACK, ST7735_RED);
+    tft.print("WRONG");
+    tft.setCursor(0, QUIZANS_TOP + (FONT_HEIGHT*correctAnswer));
+    tft.print("->");
+  }
+  tft.setTextColor(ST7735_WHITE);
+  
+  delay(5000);
+  printQuizHeader();
+}
+
+void loopQuiz()
+{
+  char dir = getJoyDir();
+  if(dir == JOY_LEFT)
+  {
+    questionFile.close();
+    questionFileOpen = false;
+    curPage = PAGE_MENU;
+    printMenuHeader();
+    printMenu();
+  }
+  
+  if(dir == JOY_UP)
+  {
+    selectAnswer(selectedAnswer - 1);
+  }
+  
+  if(dir == JOY_DOWN)
+  {
+    selectAnswer(selectedAnswer + 1);
+  }
+  
+  if(dir == JOY_PRESS)
+  {
+    checkAnswer();
   }
 }
 
