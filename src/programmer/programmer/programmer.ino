@@ -29,6 +29,9 @@
 // I2C address in 7-bit format
 #define I2C_ADDR 0x28
 
+// I2C vars
+int i2c_regptr = 0;
+
 // Because Adafruit don't actually say the font dimensions, and instead
 // just scatter magic bloody numbers everywhere...
 #define FONT_WIDTH 6
@@ -215,6 +218,30 @@ void writeFail()
 
 void i2c_recv(int numBytes)
 {
+  if(numBytes == 0)
+    return;
+    
+  // Get the reg no
+  i2c_regptr = Wire.read();
+  numBytes--;
+  
+  switch(i2c_regptr)
+  {
+    case 0:
+    {
+      int timePtr = 0;
+      while(numBytes && (timePtr != 3))
+      {
+        timeCurrent[timePtr] = Wire.read();
+        numBytes--;
+        timePtr++;
+      }
+    }
+  }
+  
+  // Blackhole
+  while(numBytes--)
+    Wire.read();
 }
 
 void i2c_trans()
