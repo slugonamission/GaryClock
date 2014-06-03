@@ -15,4 +15,4 @@ Gary Clock I2C Semantics
 
         Addr          Usage
         0x68          RTC
-        0x70 - 0x77   7-seg display
+        0x70 - 0x72   7-seg displays
