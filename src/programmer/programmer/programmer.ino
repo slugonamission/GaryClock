@@ -4,9 +4,8 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_ST7735.h"
 
-// !!! IMPORTANT !!!
-// IF THIS IS DEFINED, ADD ~5kB ONTO THE PROGRAM SIZE!
-//#define SKIP_SHIT
+
+#define SKIP_SHIT
 
 // TFT pins
 #define TFT_CS 10
@@ -69,7 +68,7 @@ int selectedItem = 0;
 int curPage = 0;
 #define PAGE_MENU 0
 #define PAGE_TIME 1
-#define PAGE_LEDS 255
+#define PAGE_LEDS 2
 #define PAGE_BRIGHTNESS 3
 #define PAGE_FLAPPY 4
 #define PAGE_CREDITS 5
@@ -105,9 +104,24 @@ void loopMenu();
 
 void printTimeHeader();
 void printTime();
+void reprintTimeSegment(unsigned char selectedSegment);
 void loopTime();
 unsigned char timeSelectedSegment = TIMESEG_HOUR;
 unsigned char timeCurrent[3] = {0, 0, 0};
+
+// -----------------------------------------
+// LED Mode page
+void printLEDHeader();
+void printLED();
+void loopLED();
+unsigned char ledMode = 1;
+uint16_t ledColours[] = {
+  ST7735_BLUE,
+  ST7735_CYAN,
+  ST7735_MAGENTA,
+  ST7735_YELLOW,
+  ST7735_RED
+};
 
 // -----------------------------------------
 // Brightness page
@@ -119,6 +133,10 @@ unsigned char curBrightness = 255;
 // Flappy Plumbridge
 void printFlappyHeader();
 void loopFlappy();
+int barHeights[5] = {50, 50, 50, 50, 50};
+int firstBarIdx = 0;
+int leadingBarSize = 0;
+int flapHeight = 0;
 
 // -----------------------------------------
 // Credits page
@@ -228,15 +246,21 @@ void i2c_recv(int numBytes)
   switch(i2c_regptr)
   {
     case 0:
-    {
-      int timePtr = 0;
-      while(numBytes && (timePtr != 3))
       {
-        timeCurrent[timePtr] = Wire.read();
-        numBytes--;
-        timePtr++;
+        int timePtr = 0;
+        while(numBytes && (timePtr != 3))
+        {
+          timeCurrent[timePtr] = Wire.read();
+          numBytes--;
+          timePtr++;
+        }
       }
-    }
+      break;
+    
+    case 1:
+      ledMode = Wire.read();
+      numBytes--;
+      break;
   }
   
   // Blackhole
@@ -246,6 +270,20 @@ void i2c_recv(int numBytes)
 
 void i2c_trans()
 {
+  switch(i2c_regptr)
+  {
+    case 0:
+      {
+        int timePtr = 0;
+        while(timePtr != 3)
+          Wire.write(timeCurrent[timePtr++]);
+      }
+      break;
+    
+    case 1:
+      Wire.write(ledMode);
+      break;
+  }
 }
 
 void setup()
@@ -256,12 +294,16 @@ void setup()
   
   tft.initR(INITR_BLACKTAB);
   tft.fillScreen(ST7735_MAGENTA);
+  tft.fillScreen(ST7735_CYAN);
+  tft.fillScreen(ST7735_YELLOW);
   tft.fillScreen(TEXTBG);
   tft.setRotation(3);
   
   Wire.begin(I2C_ADDR);
   Wire.onReceive(i2c_recv);
   Wire.onRequest(i2c_trans);
+  
+  randomSeed(analogRead(1));
   
   // Init SD card...
   // Check for SD Card
@@ -289,10 +331,16 @@ void setup()
     {
       if(!sd_card)
       {
+        tft.setCursor(160 - (6*FONT_WIDTH), curStrIdx*FONT_HEIGHT);
         writeFail();
         tft.println();
-        tft.print("!!! HALT !!!");
-        while(1);
+        tft.print("!!! \"KERNEL\" PANIC !!!");
+        while(1)
+        {
+          tft.invertDisplay(sd_card);
+          sd_card = (sd_card + 1) % 2;
+          delay(500);
+        }
       }
     }
     
@@ -368,6 +416,8 @@ void loop()
 {
   if(curPage == PAGE_MENU)
     loopMenu();
+  if(curPage == PAGE_LEDS)
+    loopLED();
   if(curPage == PAGE_TIME)
     loopTime();
   if(curPage == PAGE_BRIGHTNESS)
@@ -440,6 +490,11 @@ void loopMenu()
         printTimeHeader();
         curPage = PAGE_TIME;
         break;
+       
+      case 1:
+        printLEDHeader();
+        curPage = PAGE_LEDS;
+        break;
         
       case 2:
        printBrightnessHeader();
@@ -483,9 +538,29 @@ void printTimeHeader()
   printTime();
 }
 
+void reprintTimeSegment(unsigned char selectedSegment)
+{
+  if(selectedSegment > 2)
+    return;
+    
+  tft.setTextColor(SELTEXTCOL, SELTEXTBG);
+  tft.setTextSize(3);
+  
+  tft.setCursor(5 + (selectedSegment * 3 * FONT_WIDTH) + (selectedSegment * 3 * 2 * FONT_WIDTH), 30);
+  if(timeCurrent[selectedSegment] < 10)
+    tft.write('0');
+  tft.print(timeCurrent[selectedSegment]);
+  
+  tft.setTextColor(TEXTCOL);
+  tft.setTextSize(1);
+}
+
+// TODO: This needs optimising with the larger font...
 void printTime()
 {
-  tft.setCursor(55, 30);
+  tft.setCursor(5, 30);
+  tft.setTextSize(3);
+  tft.setTextColor(TEXTCOL, TEXTBG);
   
   // Hours...
   if(timeSelectedSegment == TIMESEG_HOUR)
@@ -517,11 +592,12 @@ void printTime()
   tft.setTextColor(TEXTCOL, TEXTBG);
   
   tft.setCursor(55, 60);
+  tft.setTextSize(1);
   
   if(timeSelectedSegment == TIMESEG_BACK)
     tft.setTextColor(SELTEXTCOL, SELTEXTBG);
   tft.print("<<< Back");
-  tft.setTextColor(TEXTCOL, TEXTBG);
+  tft.setTextColor(TEXTCOL);
 }
 
 void loopTime()
@@ -548,7 +624,8 @@ void loopTime()
       timeCurrent[timeSelectedSegment] = 0;
     else
       timeCurrent[timeSelectedSegment]++;
-    printTime();
+    reprintTimeSegment(timeSelectedSegment);
+    //printTime();
   }
   
   if(dir == JOY_DOWN && timeSelectedSegment <= TIMESEG_SEC)
@@ -562,10 +639,57 @@ void loopTime()
     }
     else
       timeCurrent[timeSelectedSegment]--;
-    printTime();
+    reprintTimeSegment(timeSelectedSegment);
+    //printTime();
   }
   
   if(dir == JOY_PRESS && timeSelectedSegment == TIMESEG_BACK)
+  {
+    curPage = PAGE_MENU;
+    printMenuHeader();
+    printMenu();
+  }
+}
+
+// -------------------------------------------------
+
+void printLEDHeader()
+{
+  tft.fillScreen(ST7735_BLACK);
+  
+  tft.setCursor(50, 0);
+  tft.println("LED Config");
+  tft.drawFastHLine(0, 10, 160, SELTEXTBG);
+  tft.setCursor(0, 15);
+  
+  printLED();
+}
+
+void printLED()
+{
+  tft.setTextSize(12);
+  tft.setTextColor(ledColours[ledMode%5], ST7735_BLACK);
+  tft.setCursor(50, 15);
+  
+  tft.print(ledMode);
+  tft.setTextSize(1);
+  tft.setTextColor(ST7735_WHITE);
+}
+
+void loopLED()
+{
+  char dir = getJoyDir();
+  if(dir == JOY_UP)
+  {
+    ledMode--;
+    printLED();
+  }
+  else if(dir == JOY_DOWN)
+  {
+    ledMode++;
+    printLED();
+  }
+  else if(dir == JOY_LEFT)
   {
     curPage = PAGE_MENU;
     printMenuHeader();
@@ -614,22 +738,85 @@ void loopBrightness()
 // -------------------------------------------------------
 void printFlappyHeader()
 {
+  firstBarIdx = 0;
+  barHeights[0] = 50; // Mmm...unrolling...
+  barHeights[1] = 50;
+  barHeights[2] = 50;
+  barHeights[3] = 50;
+  barHeights[4] = 50;
+  leadingBarSize = 10;
+  
+  flapHeight = 60;
+  
+  int i = 0;
+  int bar = firstBarIdx;
   tft.fillScreen(TEXTBG);
   
   tft.setCursor(35, 0);
   tft.println("Flappy Plumbridge");
   tft.drawFastHLine(0, 10, 160, SELTEXTBG);
   
-  tft.fillRect(15, 15, 10, 50, ST7735_GREEN);
-  tft.fillRect(15, 85, 10, 43, ST7735_CYAN);
+  // Draw the initial bars...
+  for(i = 0; i < 5; i++)
+  {
+    tft.fillRect(leadingBarSize + (i*30), 15, 10, barHeights[bar], ST7735_GREEN);
+    tft.fillRect(leadingBarSize + (i*30), 15 + barHeights[bar] + 30, 10, 145 - (15 + barHeights[bar] + 30), ST7735_CYAN);
+    bar = (bar + 1) % 5;
+  }
   
-  tft.setCursor(15, 65);
-  tft.println("NOT IMPLEMENTED YET");
+  //tft.fillRect(15, 15, 10, 50, ST7735_GREEN);
+  //tft.fillRect(15, 85, 10, 43, ST7735_CYAN);
+  
+  //tft.setCursor(15, 65);
+  //tft.println("NOT IMPLEMENTED YET");
 }
 
 void loopFlappy()
 {
+  // Shave 1px off the tail of each bar, and add one to the head of each bar.
+  // Shave cycle
   char dir = getJoyDir();
+  
+  int i = 0;
+  int bar = firstBarIdx;
+  
+  for(i = 0; i < 5; i++)
+  {
+    tft.drawFastVLine(leadingBarSize + (i*30) + 10, 15, barHeights[bar], ST7735_BLACK);
+    tft.drawFastVLine(leadingBarSize + (i*30) + 10, 15 + barHeights[bar] + 30, 145 - (15 + barHeights[bar] + 30), ST7735_BLACK);
+    bar = (bar + 1) % 5;
+  }
+  
+  for(i = 0; i < 5; i++)
+  {
+    if(leadingBarSize > 0 || i != 0)
+    {
+      tft.drawFastVLine(leadingBarSize + (i*30) - 1, 15, barHeights[bar], ST7735_GREEN);
+      tft.drawFastVLine(leadingBarSize + (i*30) - 1, 15 + barHeights[bar] + 30, 145 - (15 + barHeights[bar] + 30), ST7735_CYAN);
+    }
+    bar = (bar + 1) % 5;
+  }  
+  
+  leadingBarSize--;
+  if(leadingBarSize == -11)
+  {
+    leadingBarSize = 19;
+    firstBarIdx = (firstBarIdx + 1) % 5;
+    
+    // Gen the new bar...
+    int nextBar = (firstBarIdx + 4) % 5;
+    barHeights[nextBar] = random(5, 80);
+  }
+  
+  // Move the flap
+  tft.fillRect(5, flapHeight, 5, 5, ST7735_BLACK);
+  if(dir == JOY_PRESS && flapHeight >= 0)
+    flapHeight -= 10;
+  else if(flapHeight < 115)
+    flapHeight += 2;
+  
+  tft.fillRect(5, flapHeight, 5, 5, ST7735_RED);
+  
   if(dir == JOY_LEFT)
   {
     curPage = PAGE_MENU;
