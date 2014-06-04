@@ -5,7 +5,7 @@
 #include "Adafruit_ST7735.h"
 
 
-#define SKIP_SHIT
+//#define SKIP_SHIT
 
 // TFT pins
 #define TFT_CS 10
