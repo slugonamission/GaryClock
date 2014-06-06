@@ -27,6 +27,8 @@
 
 // I2C address in 7-bit format
 #define I2C_ADDR 0x28
+#define I2CPTR_TIME 0
+#define I2CPTR_LEDS 1
 
 // I2C vars
 int i2c_regptr = 0;
@@ -245,7 +247,7 @@ void i2c_recv(int numBytes)
   
   switch(i2c_regptr)
   {
-    case 0:
+    case I2CPTR_TIME:
       {
         int timePtr = 0;
         while(numBytes && (timePtr != 3))
@@ -257,7 +259,7 @@ void i2c_recv(int numBytes)
       }
       break;
     
-    case 1:
+    case I2CPTR_LEDS:
       ledMode = Wire.read();
       numBytes--;
       break;
@@ -272,7 +274,7 @@ void i2c_trans()
 {
   switch(i2c_regptr)
   {
-    case 0:
+    case I2CPTR_TIME:
       {
         int timePtr = 0;
         while(timePtr != 3)
@@ -280,7 +282,7 @@ void i2c_trans()
       }
       break;
     
-    case 1:
+    case I2CPTR_LEDS:
       Wire.write(ledMode);
       break;
   }
@@ -810,6 +812,8 @@ void loopFlappy()
   
   // Move the flap
   tft.fillRect(5, flapHeight, 5, 5, ST7735_BLACK);
+  
+  // Trajectory smoothing? Hah.
   if(dir == JOY_PRESS && flapHeight >= 0)
     flapHeight -= 10;
   else if(flapHeight < 115)
