@@ -15,5 +15,6 @@ Gary Clock I2C Semantics
 + Current I2C layout map:
 
         Addr          Usage
-        0x68          RTC
+        0x28          Programmer
+        0x68          RTC (DS1338)
         0x70 - 0x72   7-seg displays
