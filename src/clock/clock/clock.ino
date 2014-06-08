@@ -1,35 +1,59 @@
-#include <Wire.h>
-#include "DS1307RTC.h"
-#include "Adafruit_LEDBackpack.h"
+#include "clock.h"
 
-#define SEG1ADDR 0x71
-#define SEG2ADDR 0x71
-#define SEG3ADDR 0x72
-  
-#define HOUR_PIN 9
-#define MIN_PIN  10
-#define SEC_PIN  11
 
-Adafruit_7segment matrix1 = Adafruit_7segment();
-//Adafruit_7segment matrix2 = Adafruit_7segment();
-//Adafruit_7segment matrix3 = Adafruit_7segment();
+void setup() {
+	// Sanity delay
+	delay(1000);
 
-void setup()
-{  
-  matrix1.begin(SEG1ADDR);
-  //matrix2.begin(SEG2ADDR);
-  //matrix3.begin(SEG3ADDR);
-  
-  delay(1000);
-  
-  matrix1.print(1000, DEC);
-  matrix1.writeDisplay();
-  
-  pinMode(HOUR_PIN, OUTPUT);
-  pinMode(MIN_PIN, OUTPUT);
-  pinMode(SEC_PIN, OUTPUT);
+	// Set up voltmeters
+	meterL.begin(METERL_PIN);
+	meterM.begin(METERM_PIN);
+	meterR.begin(METERR_PIN);
+
+	// Set up displays
+	segL.begin(SEGL_ADDR);
+	segM.begin(SEGM_ADDR);
+	segR.begin(SEGR_ADDR);
+
+	// Set up LEDs
+	leds.begin();
+
+	// Set up button
+	pinMode(BTN_PIN, INPUT);
+	// TODO: Set up button interrupt
+
+	// Set up RTC
+	// TODO: Set up RTC
+
+
+	// Test displays
+	segL.print(1111, DEC);
+	segM.print(2222, DEC);
+	segR.print(3333, DEC);
+	segL.writeDisplay();
+	segM.writeDisplay();
+	segR.writeDisplay();
+	delay(1000);
+	segL.clearDisplay();
+	segM.clearDisplay();
+	segR.clearDisplay();
+	delay(1000);
+
+	// Test voltmeters
+	meterL.moveDamped(255);
+	meterM.moveDamped(255);
+	meterR.moveDamped(255);
+	delay(1000);
+	meterL.moveDamped(0);
+	meterM.moveDamped(0);
+	meterR.moveDamped(0);
+	delay(1000);
+
+	// Test LEDs
+	leds.introAnimation();
 }
 
-void loop()
-{
+
+void loop() {
+
 }

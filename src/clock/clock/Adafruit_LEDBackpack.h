@@ -29,14 +29,9 @@
 #else
  #include <Wire.h>
 #endif
-#include "Adafruit_GFX.h"
 
 #define LED_ON 1
 #define LED_OFF 0
-
-#define LED_RED 1
-#define LED_YELLOW 2
-#define LED_GREEN 3
  
 
 
@@ -67,34 +62,6 @@ class Adafruit_LEDBackpack {
   void init(uint8_t a);
  private:
   uint8_t i2c_addr;
-};
-
-class Adafruit_24bargraph : public Adafruit_LEDBackpack {
- public:
-  Adafruit_24bargraph(void);
-
-  void setBar(uint8_t bar, uint8_t color);
-
- private:
-};
-
-
-class Adafruit_8x8matrix : public Adafruit_LEDBackpack, public Adafruit_GFX {
- public:
-  Adafruit_8x8matrix(void);
-
-  void drawPixel(int16_t x, int16_t y, uint16_t color);
-
- private:
-};
-
-class Adafruit_BicolorMatrix : public Adafruit_LEDBackpack, public Adafruit_GFX {
- public:
-  Adafruit_BicolorMatrix(void);
-
-  void drawPixel(int16_t x, int16_t y, uint16_t color);
-
- private:
 };
 
 

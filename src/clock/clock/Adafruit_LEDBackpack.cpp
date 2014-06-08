@@ -25,7 +25,6 @@
  #include <Wire.h>
 #endif
 #include "Adafruit_LEDBackpack.h"
-#include "Adafruit_GFX.h"
 
 #ifndef _BV
   #define _BV(bit) (1<<(bit))
@@ -98,108 +97,6 @@ void Adafruit_LEDBackpack::clear(void) {
   }
 }
 
-/******************************* 24 BARGRAPH OBJECT */
-
-Adafruit_24bargraph::Adafruit_24bargraph(void) {
-
-}
-
-void Adafruit_24bargraph::setBar(uint8_t bar, uint8_t color) {
-  uint16_t a, c;
- 
-  if (bar < 12)
-    c = bar / 4;
-  else 
-    c = (bar - 12) / 4;
-
-  a = bar % 4;
-  if (bar >= 12)
-    a += 4;
-    
-  //Serial.print("Ano = "); Serial.print(a); Serial.print(" Cath = "); Serial.println(c);
-  if (color == LED_RED) {
-    displaybuffer[c] |= _BV(a) ;
-  } else if (color == LED_YELLOW) {
-    displaybuffer[c] |= _BV(a) | _BV(a+8);
-  } else if (color == LED_OFF) {
-    displaybuffer[c] &= ~_BV(a) & ~_BV(a+8);
-  } else if (color == LED_GREEN) {
-    displaybuffer[c] |= _BV(a+8) ;
-  } 
-}
-
-
-/******************************* 8x8 MATRIX OBJECT */
-
-Adafruit_8x8matrix::Adafruit_8x8matrix(void) : Adafruit_GFX(8, 8) {
-}
-
-void Adafruit_8x8matrix::drawPixel(int16_t x, int16_t y, uint16_t color) {
-  if ((y < 0) || (y >= 8)) return;
-  if ((x < 0) || (x >= 8)) return;
-
- // check rotation, move pixel around if necessary
-  switch (getRotation()) {
-  case 1:
-    swap(x, y);
-    x = 8 - x - 1;
-    break;
-  case 2:
-    x = 8 - x - 1;
-    y = 8 - y - 1;
-    break;
-  case 3:
-    swap(x, y);
-    y = 8 - y - 1;
-    break;
-  }
-
-  // wrap around the x
-  x += 7;
-  x %= 8;
-
-
-  if (color) {
-    displaybuffer[y] |= 1 << x;
-  } else {
-    displaybuffer[y] &= ~(1 << x);
-  }
-}
-
-/******************************* 8x8 BICOLOR MATRIX OBJECT */
-
-Adafruit_BicolorMatrix::Adafruit_BicolorMatrix(void) : Adafruit_GFX(8, 8) {
-}
-
-void Adafruit_BicolorMatrix::drawPixel(int16_t x, int16_t y, uint16_t color) {
-  if ((y < 0) || (y >= 8)) return;
-  if ((x < 0) || (x >= 8)) return;
-
-  switch (getRotation()) {
-  case 1:
-    swap(x, y);
-    x = 8 - x - 1;
-    break;
-  case 2:
-    x = 8 - x - 1;
-    y = 8 - y - 1;
-    break;
-  case 3:
-    swap(x, y);
-    y = 8 - y - 1;
-    break;
-  }
-
-  if (color == LED_GREEN) {
-    displaybuffer[y] |= 1 << x;
-  } else if (color == LED_RED) {
-    displaybuffer[y] |= 1 << (x+8);
-  } else if (color == LED_YELLOW) {
-    displaybuffer[y] |= (1 << (x+8)) | (1 << x);
-  } else if (color == LED_OFF) {
-    displaybuffer[y] &= ~(1 << x) & ~(1 << (x+8));
-  }
-}
 
 /******************************* 7 SEGMENT OBJECT */
 
