@@ -19,6 +19,9 @@ uint8_t top[] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 uint8_t mid[] = {10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
 uint8_t bot[] = {29, 28, 27, 26, 25, 24, 23, 22, 21, 20};
 
+int rainbowCount = 0;
+int brightness = 0;
+
 
 void setup() {
 	delay(1000);
@@ -34,7 +37,7 @@ void setup() {
 	delay(1000);
 
 
-
+	// Power on animation
 	for (int i = 0; i < 256; i++) {
 		for (int led = 0; led < sizeof(logoLeds); led++) 
 			leds[logoLeds[led]] = CHSV(0, 0, i);
@@ -98,48 +101,58 @@ void setup() {
 		}
 
 		FastLED.show();
-		delay(15);
+		delay(16);
 	}
 
-	delay(150);
+	delay(120);
 
 	for (int i = 0; i < 13; i++) {
 		if (i > 2) {
-			leds[bot[i-3]] = CRGB::Black;
-			leds[mid[i-3]] = CRGB::Black;
+			leds[bot[(9-i)+3]] = CRGB::Black;
+			leds[mid[(9-i)+3]] = CRGB::Black;
 		}
 
 		if (i > 1 && i < 10) {
-			leds[bot[i-2]] = CHSV((i-2) * 25, 200, 50);
-			leds[mid[i-2]] = CHSV((i-2) * 25, 200, 50);
+			leds[bot[(9-i)+2]] = CHSV((i-2) * 25, 200, 50);
+			leds[mid[(9-i)+2]] = CHSV((i-2) * 25, 200, 50);
 		}
 
 		if (i > 0 && i < 11) {
-			leds[bot[i-1]] = CHSV((i-1) * 25, 200, 130);
-			leds[mid[i-1]] = CHSV((i-1) * 25, 200, 130);
+			leds[bot[(9-i)+1]] = CHSV((i-1) * 25, 200, 130);
+			leds[mid[(9-i)+1]] = CHSV((i-1) * 25, 200, 130);
 		}
 
 		if (i < 10) {
-			leds[bot[i]] = CHSV(i * 25, 200, 210);
-			leds[mid[i]] = CHSV(i * 25, 200, 210);
+			leds[bot[(9-i)]] = CHSV(i * 25, 200, 210);
+			leds[mid[(9-i)]] = CHSV(i * 25, 200, 210);
 		}
 
 		FastLED.show();
-		delay(15);
+		delay(16);
 	}
+
+	delay(2000);
 	
 }
 
 
 void loop() {
 
-	/*
-	for(int whiteLed = 0; whiteLed < 22; whiteLed++) {
-	  leds[loopPattern[whiteLed]] = CRGB::White;
-	  FastLED.show();
-	  delay(50);
-	  leds[loopPattern[whiteLed]] = CRGB::Black;
-   }
-   */
+	if (brightness < 120) {
+		brightness++;
+		LEDS.setBrightness(brightness);
+	}
+
+	// Rainbow
+	for (int j = 0; j < 10; j++) {
+		leds[top[j]].setHue((rainbowCount % 255) + (j * (255 / 10)));
+		leds[mid[j]].setHue((rainbowCount % 255) + (j * (255 / 10)));
+		leds[bot[j]].setHue((rainbowCount % 255) + (j * (255 / 10)));
+	}
+
+	FastLED.show();
+	delay(2);
+
+	rainbowCount++;
 
 }
