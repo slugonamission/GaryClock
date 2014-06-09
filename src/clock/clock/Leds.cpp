@@ -2,7 +2,7 @@
 
 
 Leds::Leds(void) {
-
+  mode = LEDMODE_SMALL;
 }
 
 void Leds::begin(void) {

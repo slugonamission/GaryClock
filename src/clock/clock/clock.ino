@@ -20,6 +20,7 @@ Voltmeter meterR = Voltmeter();
 Leds leds = Leds();
 
 Programmer programmer = Programmer();
+bool gotProgrammer = 0;
 
 void rtcTick()
 {
@@ -140,11 +141,22 @@ void setup() {
         
         // Enable the 1Hz oscillator
         RTC.enableTick();
-        
-        
 }
 
 
 void loop() {
-
+  // Is the programmer there?
+  if(!gotProgrammer && programmer.exists())
+  {
+    programmer.setTime(curTime[0], curTime[1], curTime[2]);
+    programmer.setLedMode(leds.getMode());
+    gotProgrammer = true;
+  }
+  else
+  {
+    if(!programmer.exists())
+      gotProgrammer = false;
+  }
+  
+  delay(3000);
 }

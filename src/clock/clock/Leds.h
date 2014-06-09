@@ -3,6 +3,11 @@
 #include "Arduino.h"
 #include "FastLED.h"
 
+#define LEDMODE_OFF 0
+#define LEDMODE_SMALL 1
+#define LEDMODE_COLOUR 2
+#define LEDMODE_PULSE 3
+#define LEDMODE_BATSHIT 4
 
 #define LEDS_PIN 6
 #define NUM_LEDS 30
@@ -25,8 +30,10 @@ class Leds {
 		Leds(void);
 		void begin(void);
 		void introAnimation(void);
+                uint8_t getMode() { return mode; }
 
 	private:
-  		CRGB leds[NUM_LEDS];  		
+  		CRGB leds[NUM_LEDS];  
+                uint8_t mode;		
 };
 #endif
