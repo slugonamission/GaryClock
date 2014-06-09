@@ -1,3 +1,6 @@
+#ifndef __CLOCK_H__
+#define __CLOCK_H__
+
 #include "DS1307RTC.h"
 #include "SevenSeg.h"
 #include "Voltmeter.h"
@@ -21,18 +24,4 @@
 
 //#define LEDS_PIN 6 // (actually defined in Leds.h)
 
-
-int allHands[] = {METERL_PIN, METERM_PIN, METERR_PIN};
-
-// 7-segment displays (left, middle, right)
-SevenSeg segL = SevenSeg();
-SevenSeg segM = SevenSeg();
-SevenSeg segR = SevenSeg();
-
-Voltmeter meterL = Voltmeter();
-Voltmeter meterM = Voltmeter();
-Voltmeter meterR = Voltmeter();
-
-Leds leds = Leds();
-
-Programmer programmer = Programmer();
+#endif

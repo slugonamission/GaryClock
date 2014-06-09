@@ -1,3 +1,6 @@
+#ifndef __VOLTMETER_H__
+#define __VOLTMETER_H__
+
 #include "Arduino.h"
 
 // Damping parameters
@@ -19,5 +22,4 @@ class Voltmeter {
   		int position;
 };
 
-
-
+#endif

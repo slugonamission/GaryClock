@@ -1,1 +1,1 @@
-DS3231 library shoddily ripped from https://github.com/rodan/ds3231.
+Date/DS1307RTC modules taken from http://www.pjrc.com/teensy/td_libs_Time.html and http://www.pjrc.com/teensy/td_libs_DS1307RTC.html.

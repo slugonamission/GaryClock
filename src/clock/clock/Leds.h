@@ -1,3 +1,5 @@
+#ifndef __LEDS_H__
+#define __LEDS_H__
 #include "Arduino.h"
 #include "FastLED.h"
 
@@ -27,3 +29,4 @@ class Leds {
 	private:
   		CRGB leds[NUM_LEDS];  		
 };
+#endif

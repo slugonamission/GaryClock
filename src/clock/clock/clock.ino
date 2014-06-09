@@ -1,5 +1,42 @@
 #include "clock.h"
+#include <Wire.h>
 
+int allHands[] = {METERL_PIN, METERM_PIN, METERR_PIN};
+int curTime[] = {0,0,0};
+
+// 7-segment displays (left, middle, right)
+SevenSeg segL = SevenSeg();
+SevenSeg segM = SevenSeg();
+SevenSeg segR = SevenSeg();
+
+Voltmeter meterL = Voltmeter();
+Voltmeter meterM = Voltmeter();
+Voltmeter meterR = Voltmeter();
+
+Leds leds = Leds();
+
+Programmer programmer = Programmer();
+
+void rtcTick()
+{
+  curTime[2]++;
+  if(curTime[2] == 60)
+  {
+    curTime[2] = 0;
+    curTime[1]++;
+    
+    if(curTime[1] == 60)
+    {
+      curTime[1] = 0;
+      curTime[0]++;
+      
+      if(curTime[0] == 12)
+      {
+        curTime[0] = 0;
+      }
+    }
+  }
+}
 
 void setup() {
 	// Sanity delay
@@ -21,9 +58,6 @@ void setup() {
 	// Set up button
 	//pinMode(BTN_PIN, INPUT);
 	// TODO: Set up button interrupt
-
-	// Set up RTC
-	// TODO: Set up RTC
 
 	// Set up programmer
 	programmer.begin(PROG_ADDR);
@@ -54,6 +88,18 @@ void setup() {
 
 	// Test LEDs
 	leds.introAnimation();
+
+        // Get the current time from RTC
+        time_t tz = RTC.get();
+        curTime[0] = hour(tz);
+        curTime[1] = minute(tz);
+        curTime[2] = second(tz);
+        
+        // Set the RTC interrupt callback
+        attachInterrupt(0, rtcTick, RISING);
+        
+        // Enable the 1Hz oscillator
+        RTC.enableTick();
 }
 
 

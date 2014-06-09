@@ -136,6 +136,51 @@ uint8_t DS1307RTC::bcd2dec(uint8_t num)
   return ((num/16 * 10) + (num % 16));
 }
 
+bool DS1307RTC::enableTick()
+{
+  uint8_t tmpReg = 0;
+  
+  Wire.beginTransmission(DS1307_CTRL_ID);
+#if ARDUINO >= 100 
+  Wire.write((uint8_t)0x07); // Config ptr
+#else
+  Wire.send(0x07); // reset register pointer
+#endif
+
+  if (Wire.endTransmission() != 0) {
+    exists = false;
+    return false;
+  }
+  
+  Wire.requestFrom(DS1307_CTRL_ID, 1);
+  if (Wire.available() < 1) return false;
+
+#if ARDUINO >= 100
+  tmpReg = Wire.read();
+#else
+  tmpReg = Wire.receive();
+#endif
+
+  tmpReg |= 0x10;
+  
+  Wire.beginTransmission(DS1307_CTRL_ID);
+#if ARDUINO >= 100 
+  Wire.write((uint8_t)0x07); // Config ptr
+  Wire.write(tmpReg);
+#else
+  Wire.send(0x07); // reset register pointer
+  Wire.send(tmpReg);
+#endif
+
+  if (Wire.endTransmission() != 0) {
+    exists = false;
+    return false;
+  }
+
+  return true;
+
+}
+
 bool DS1307RTC::exists = false;
 
 DS1307RTC RTC = DS1307RTC(); // create an instance for the user

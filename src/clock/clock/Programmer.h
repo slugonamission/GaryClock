@@ -1,3 +1,5 @@
+#ifndef __PROGRAMMER_H__
+#define __PROGRAMMER_H__
 #include "Arduino.h"
 #include <Wire.h>
 
@@ -10,3 +12,5 @@ class Programmer {
 	private:
 		uint8_t i2c_addr;
 };
+
+#endif
