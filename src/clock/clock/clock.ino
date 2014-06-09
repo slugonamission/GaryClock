@@ -24,6 +24,8 @@ bool gotProgrammer = 0;
 
 void rtcTick()
 {
+  // DO NOT ISSUE AN I2C TRANSACTION IN THIS ISR.
+  // WE ISSUE THESE IN loop(). RACE CONDITIONS CAN ARISE.
   curTime[2]++;
   if(curTime[2] == 60)
   {
