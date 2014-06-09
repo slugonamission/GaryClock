@@ -13,6 +13,7 @@ class Voltmeter {
 	public:
 		Voltmeter(void);
 		void begin(int pin);
+                void move(int desiredPosition);
 		void moveDamped(int desiredPosition);
 		void moveDamped(int desiredPosition, int currentPosition);
 		//void moveMultipleDamped(int pins[], int count, int currentPosition, int desiredPosition);

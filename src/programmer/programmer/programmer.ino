@@ -29,9 +29,10 @@
 #define I2C_ADDR 0x28
 #define I2CPTR_TIME 0
 #define I2CPTR_LEDS 1
+#define I2CPTR_STOPWORLD 2
 
 // I2C vars
-int i2c_regptr = 0;
+uint8_t i2c_regptr = 0;
 
 // Because Adafruit don't actually say the font dimensions, and instead
 // just scatter magic bloody numbers everywhere...
@@ -109,7 +110,7 @@ void printTime();
 void reprintTimeSegment(unsigned char selectedSegment);
 void loopTime();
 unsigned char timeSelectedSegment = TIMESEG_HOUR;
-unsigned char timeCurrent[3] = {0, 0, 0};
+uint8_t timeCurrent[3] = {0, 0, 0};
 
 // -----------------------------------------
 // LED Mode page
@@ -276,14 +277,18 @@ void i2c_trans()
   {
     case I2CPTR_TIME:
       {
-        int timePtr = 0;
-        while(timePtr != 3)
-          Wire.write(timeCurrent[timePtr++]);
+        Wire.write(timeCurrent, 3);
       }
       break;
     
     case I2CPTR_LEDS:
       Wire.write(ledMode);
+      break;
+    case I2CPTR_STOPWORLD:
+      if(curPage == PAGE_TIME)
+        Wire.write((uint8_t)1);
+      else
+        Wire.write((uint8_t)0);
       break;
   }
 }

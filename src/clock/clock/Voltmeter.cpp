@@ -10,6 +10,12 @@ void Voltmeter::begin(int pin) {
   pinMode(pwmPin, OUTPUT);
 }
 
+void Voltmeter::move(int desiredPosition)
+{
+  analogWrite(pwmPin, desiredPosition);
+  position = desiredPosition;
+}
+
 void Voltmeter::moveDamped(int desiredPosition) {
 	moveDamped(desiredPosition, position);
 }

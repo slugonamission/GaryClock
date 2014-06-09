@@ -165,6 +165,9 @@ bool DS1307RTC::setTickMode(bool enabled)
     tmpReg |= 0x10;
   else
     tmpReg &= ~0x10;
+  
+  // Set frequency to 1Hz
+  tmpReg &= ~0x03;
     
   Wire.beginTransmission(DS1307_CTRL_ID);
 #if ARDUINO >= 100 

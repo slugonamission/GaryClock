@@ -2,7 +2,7 @@
 #include <Wire.h>
 
 int allHands[] = {METERL_PIN, METERM_PIN, METERR_PIN};
-int curTime[] = {0,0,0};
+ uint8_t curTime[] = {0,0,0};
 
 uint8_t meterLoffset[12];
 uint8_t meterMoffset[59];
@@ -21,9 +21,12 @@ Leds leds = Leds();
 
 Programmer programmer = Programmer();
 bool gotProgrammer = 0;
+bool stopWorld = 0;
 
 void rtcTick()
 {
+  if(stopWorld)
+    return;
   // DO NOT ISSUE AN I2C TRANSACTION IN THIS ISR.
   // WE ISSUE THESE IN loop(). RACE CONDITIONS CAN ARISE.
   curTime[2]++;
@@ -139,15 +142,19 @@ void setup() {
         // Set the RTC interrupt callback
         // THE MODE MAY NOT BE CORRECT. CHECK IT
         // Actually...it shouldn't matter...
+        pinMode(2, INPUT_PULLUP);
         attachInterrupt(0, rtcTick, RISING);
         
         // Enable the 1Hz oscillator
-        RTC.setTickMode(true);
+        if(!RTC.setTickMode(true))
+          leds.introAnimation();
 }
 
 
 void loop() {
   // Is the programmer there?
+  stopWorld = programmer.worldStop();
+  
   if(!gotProgrammer && programmer.exists())
   {
     programmer.setTime(curTime[0], curTime[1], curTime[2]);
@@ -156,9 +163,17 @@ void loop() {
   }
   else
   {
-    if(!programmer.exists())
+    if(stopWorld && programmer.getTime(&curTime[0], &curTime[1], &curTime[2]))
+    {
+      meterL.moveDamped(meterLoffset[curTime[0]%12]);
+      meterM.moveDamped(meterMoffset[curTime[1]%60]);
+      meterR.moveDamped(meterRoffset[curTime[2]%60]);
+    }
+    else
+    {
       gotProgrammer = false;
+    }
   }
   
-  delay(3000);
+  delay(1000);
 }
