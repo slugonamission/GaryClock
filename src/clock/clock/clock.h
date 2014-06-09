@@ -1,9 +1,13 @@
-#include <Wire.h>
 #include "DS1307RTC.h"
 #include "SevenSeg.h"
 #include "Voltmeter.h"
 #include "Leds.h"
+#include "Programmer.h"
 
+
+#define RTC_ADDR 0x68
+
+#define PROG_ADDR 0x28
 
 #define SEGL_ADDR 0x70
 #define SEGM_ADDR 0x71
@@ -30,3 +34,5 @@ Voltmeter meterM = Voltmeter();
 Voltmeter meterR = Voltmeter();
 
 Leds leds = Leds();
+
+Programmer programmer = Programmer();
