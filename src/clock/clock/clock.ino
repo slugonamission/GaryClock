@@ -4,6 +4,10 @@
 int allHands[] = {METERL_PIN, METERM_PIN, METERR_PIN};
 int curTime[] = {0,0,0};
 
+uint8_t meterLoffset[12];
+uint8_t meterMoffset[59];
+uint8_t meterRoffset[59];
+
 // 7-segment displays (left, middle, right)
 SevenSeg segL = SevenSeg();
 SevenSeg segM = SevenSeg();
@@ -34,8 +38,14 @@ void rtcTick()
       {
         curTime[0] = 0;
       }
+      
+      meterL.moveDamped(meterLoffset[curTime[0]]);
     }
+    
+    meterM.moveDamped(meterMoffset[curTime[1]]);
   }
+  
+  meterR.moveDamped(meterRoffset[curTime[2]]);
 }
 
 void setup() {
@@ -62,6 +72,29 @@ void setup() {
 	// Set up programmer
 	programmer.begin(PROG_ADDR);
 
+        // Set the offsets
+        // Precalc to save time. Also allows setting stupid offsets later.
+        for(int i = 0; i < 12; i++)
+        {
+          float tmp = 255.0f / 11.0f;
+          tmp = tmp * (float)i;
+          meterLoffset[i] = (uint8_t)tmp;
+        }
+        
+        for(int i = 0; i < 60; i++)
+        {
+          float tmp = 255.0f / 59.0f;
+          tmp = tmp * (float)i;
+          meterMoffset[i] = (uint8_t)tmp;
+        }
+        
+        for(int i = 0; i < 60; i++)
+        {
+          float tmp = 255.0f / 59.0f;
+          tmp = tmp * (float)i;
+          meterRoffset[i] = (uint8_t)tmp;
+        }
+    
 
 	// Test displays
 	//segL.print(1111, DEC);
@@ -95,11 +128,20 @@ void setup() {
         curTime[1] = minute(tz);
         curTime[2] = second(tz);
         
+        // Set the voltmeters
+        meterL.moveDamped(meterLoffset[curTime[0]]);
+        meterM.moveDamped(meterMoffset[curTime[1]]);
+        meterR.moveDamped(meterRoffset[curTime[2]]);
+        
         // Set the RTC interrupt callback
+        // THE MODE MAY NOT BE CORRECT. CHECK IT
+        // Actually...it shouldn't matter...
         attachInterrupt(0, rtcTick, RISING);
         
         // Enable the 1Hz oscillator
         RTC.enableTick();
+        
+        
 }
 
 
