@@ -136,7 +136,7 @@ uint8_t DS1307RTC::bcd2dec(uint8_t num)
   return ((num/16 * 10) + (num % 16));
 }
 
-bool DS1307RTC::enableTick()
+bool DS1307RTC::setTickMode(bool enabled)
 {
   uint8_t tmpReg = 0;
   
@@ -161,8 +161,11 @@ bool DS1307RTC::enableTick()
   tmpReg = Wire.receive();
 #endif
 
-  tmpReg |= 0x10;
-  
+  if(enabled)
+    tmpReg |= 0x10;
+  else
+    tmpReg &= ~0x10;
+    
   Wire.beginTransmission(DS1307_CTRL_ID);
 #if ARDUINO >= 100 
   Wire.write((uint8_t)0x07); // Config ptr

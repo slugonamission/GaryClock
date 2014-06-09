@@ -19,7 +19,7 @@ class DS1307RTC
     static bool read(tmElements_t &tm);
     static bool write(tmElements_t &tm);
     static bool chipPresent() { return exists; }
-    static bool enableTick();
+    static bool setTickMode(bool enabled);
 
   private:
     static bool exists;

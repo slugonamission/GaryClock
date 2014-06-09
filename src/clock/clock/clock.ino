@@ -140,7 +140,7 @@ void setup() {
         attachInterrupt(0, rtcTick, RISING);
         
         // Enable the 1Hz oscillator
-        RTC.enableTick();
+        RTC.setTickMode(true);
 }
 
 
