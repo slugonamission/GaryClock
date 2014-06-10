@@ -23,8 +23,15 @@ Programmer programmer = Programmer();
 bool gotProgrammer = 0;
 bool stopWorld = 0;
 
+// This is to allow the programmer loop to be able to skip iterations. This is because if each iteration
+// of loop() caused an I2C transaction, the programmer would basically stop due to the number of incoming
+// transactions. This then allows loop() to drive the LED patterns and still query the programmer.
+#define PROGRAMMER_SKIP_NUM 1
+volatile int programmerLoopSkip = 1;
+
 void rtcTick()
 {
+  programmerLoopSkip--;
   if(stopWorld)
     return;
   // DO NOT ISSUE AN I2C TRANSACTION IN THIS ISR.
@@ -129,7 +136,7 @@ void setup() {
 	leds.introAnimation();
 
         // Get the current time from RTC
-        time_t tz = RTC.get();
+        time_t tz = RTC.get(); 
         curTime[0] = hour(tz) % 12;
         curTime[1] = minute(tz);
         curTime[2] = second(tz);
@@ -153,16 +160,26 @@ void setup() {
 
 void loop() {
   // Is the programmer there?
+  leds.tick();
+  
+  if(programmerLoopSkip != 0)
+    return;
+    
+  programmerLoopSkip = PROGRAMMER_SKIP_NUM;
+    
   stopWorld = programmer.worldStop();
   
   if(!gotProgrammer && programmer.exists())
   {
-    programmer.setTime(curTime[0], curTime[1], curTime[2]);
     programmer.setLedMode(leds.getMode());
+    programmer.setTime(curTime[0], curTime[1], curTime[2]);
+    delay(1000);
     gotProgrammer = true;
   }
-  else
+  else if(gotProgrammer)
   {
+    uint8_t nextLed = 0;
+    
     if(stopWorld && programmer.getTime(&curTime[0], &curTime[1], &curTime[2]))
     {
       tmElements_t tz;
@@ -176,11 +193,14 @@ void loop() {
       meterM.moveDamped(meterMoffset[curTime[1]%60]);
       meterR.moveDamped(meterRoffset[curTime[2]%60]);
     }
+    else if(programmer.getLedMode(nextLed)) // Only need to do this if the world isn't stopped, hence there's a chance the user is on the LED page.
+    {
+      if(nextLed != leds.getMode())
+        leds.setMode(nextLed);
+    }
     else
     {
       gotProgrammer = false;
     }
   }
-  
-  delay(1000);
 }

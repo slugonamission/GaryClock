@@ -109,7 +109,7 @@ void printTimeHeader();
 void printTime();
 void reprintTimeSegment(unsigned char selectedSegment);
 void loopTime();
-unsigned char timeSelectedSegment = TIMESEG_HOUR;
+uint8_t timeSelectedSegment = TIMESEG_HOUR;
 uint8_t timeCurrent[3] = {0, 0, 0};
 
 // -----------------------------------------
@@ -245,6 +245,9 @@ void i2c_recv(int numBytes)
   // Get the reg no
   i2c_regptr = Wire.read();
   numBytes--;
+  
+  if(numBytes == 0)
+    return;
   
   switch(i2c_regptr)
   {
