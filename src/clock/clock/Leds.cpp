@@ -1,23 +1,27 @@
 #include "Leds.h"
 
 
-Leds::Leds(void) {
-  mode = LEDMODE_COLOUR;
-  currentColourOffset = 0;
-  currentColourCountdown = LEDMODE_COLOUR_COUNTDOWN;
+Leds::Leds() {
+	mode = LEDMODE_COLOUR;
+	currentColourOffset = 0;
+	currentColourCountdown = LEDMODE_COLOUR_COUNTDOWN;
 }
 
-void Leds::begin(void) {
+void Leds::begin() {
 	FastLED.addLeds<WS2812B, LEDS_PIN, GRB>(leds, NUM_LEDS);
 
 	// Turn all LEDs off
+	turnAllOff();
+}
+
+void Leds::turnAllOff() {
 	for (int led = 0; led < NUM_LEDS; led++) {
 		leds[led] = CRGB::Black;
 	}
 	FastLED.show();
 }
 
-void Leds::introAnimation(void) {
+void Leds::introAnimation() {
 	// Power on animation
 	for (int i = 0; i < 256; i++) {
 		for (int led = 0; led < sizeof(logoLeds); led++) 
@@ -113,11 +117,23 @@ void Leds::introAnimation(void) {
 	}
 }
 
+
+void Leds::errorAnimation() {
+	// Turn all red (will do for now)
+	for (int led = 0; led < 30; led++) 
+		leds[led] = CRGB(100, 0, 0);
+
+	FastLED.show();
+}
+
+
 void Leds::setMode(uint8_t mode)
 {
-  // Do any state switching required.
+	turnAllOff();
+
+	// TODO: Do any state switching required.
   
-  this->mode = mode;
+	this->mode = mode;
 }
 
 // Called from loop(). Causes the animation to (optionally) skip to the next stage.
@@ -126,23 +142,23 @@ void Leds::setMode(uint8_t mode)
 // the LED routine would effectively block the programmer query.
 void Leds::tick()
 {
-  switch(mode)
-  {
-    case LEDMODE_OFF:
-      return;
-    case LEDMODE_SMALL:
-      tickSmall();
-      break;
-    case LEDMODE_COLOUR:
-      tickColour();
-      break;
-    case LEDMODE_PULSE:
-      tickPulse();
-      break;
-    case LEDMODE_BATSHIT:
-      tickBatshit();
-      break;
-  }
+	switch(mode)
+	{
+		case LEDMODE_OFF:
+			return;
+		case LEDMODE_SMALL:
+			tickSmall();
+			break;
+		case LEDMODE_COLOUR:
+			tickColour();
+			break;
+		case LEDMODE_PULSE:
+			tickPulse();
+			break;
+		case LEDMODE_BATSHIT:
+			tickBatshit();
+			break;
+	}
 }
 
 void Leds::tickSmall()
@@ -151,19 +167,19 @@ void Leds::tickSmall()
 
 void Leds::tickColour()
 {
-  if(currentColourCountdown--)
-    return;
-  currentColourCountdown = LEDMODE_COLOUR_COUNTDOWN;
-  
-  for(int i = 0; i < LED_WIDTH; i++)
-  {
-    leds[top[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 200, 200);
-    leds[mid[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 200, 200);
-    leds[bot[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 200, 200);
-  }
-  FastLED.show();
-  
-  currentColourOffset += LEDMODE_COLOUR_TIME_STEP;
+	if(currentColourCountdown--)
+		return;
+	currentColourCountdown = LEDMODE_COLOUR_COUNTDOWN;
+
+	for(int i = 0; i < LED_WIDTH; i++)
+	{
+		leds[top[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 255, 120);
+		leds[mid[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 255, 120);
+		leds[bot[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 255, 120);
+	}
+	FastLED.show();
+
+	currentColourOffset += LEDMODE_COLOUR_TIME_STEP;
 }
 
 void Leds::tickPulse()

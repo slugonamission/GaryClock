@@ -5,7 +5,7 @@
 #define LED_REG 1
 #define STOP_REG 2
 
-Programmer::Programmer(void) {
+Programmer::Programmer() {
 
 }
 

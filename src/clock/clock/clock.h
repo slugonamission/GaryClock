@@ -18,9 +18,9 @@
 
 #define BTN_PIN 3
   
-#define METERL_PIN 11
+#define METERL_PIN 9
 #define METERM_PIN 10
-#define METERR_PIN 9
+#define METERR_PIN 11
 
 //#define LEDS_PIN 6 // (actually defined in Leds.h)
 
