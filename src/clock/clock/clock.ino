@@ -5,8 +5,8 @@ int allHands[] = {METERL_PIN, METERM_PIN, METERR_PIN};
  uint8_t curTime[] = {0,0,0};
 
 uint8_t meterLoffset[12];
-uint8_t meterMoffset[60];
-uint8_t meterRoffset[60];
+uint8_t meterMoffset[59];
+uint8_t meterRoffset[59];
 
 // 7-segment displays (left, middle, right)
 SevenSeg segL = SevenSeg();
@@ -165,6 +165,13 @@ void loop() {
   {
     if(stopWorld && programmer.getTime(&curTime[0], &curTime[1], &curTime[2]))
     {
+      tmElements_t tz;
+      RTC.read(tz);
+      tz.Hour = curTime[0];
+      tz.Minute = curTime[1];
+      tz.Second = curTime[2];
+      RTC.write(tz);
+      
       meterL.moveDamped(meterLoffset[curTime[0]%12]);
       meterM.moveDamped(meterMoffset[curTime[1]%60]);
       meterR.moveDamped(meterRoffset[curTime[2]%60]);
