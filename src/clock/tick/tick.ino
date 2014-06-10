@@ -2,17 +2,17 @@
  * Testing damping on the Voltmeter - stops some of the intertia from the heavy needle
  **/
 
-#define SECS_PIN  9
+#define SECS_PIN  11
 #define MINS_PIN  10
-#define HOURS_PIN 11
+#define HOURS_PIN 9
 int allHands[] = {SECS_PIN, MINS_PIN, HOURS_PIN};
 
 #define TICK_TIME 1000
 
 // Damping parameters
 #define USE_DAMPING   1
-#define DAMP_DELAY    125
-#define DAMP_AMOUNT   72
+#define DAMP_DELAY    120
+#define DAMP_AMOUNT   69
 #define DAMP_DURATION (DAMP_DELAY + DAMP_AMOUNT)
 
 
@@ -24,7 +24,8 @@ void setup() {
   moveDamped(HOURS_PIN, 0, 127);
   moveDamped(MINS_PIN, 0, 127);
   moveDamped(SECS_PIN, 0, 127);
-*/
+
+  delay(10000);*/
 } 
 
 
