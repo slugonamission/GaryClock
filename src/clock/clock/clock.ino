@@ -130,7 +130,7 @@ void setup() {
 
         // Get the current time from RTC
         time_t tz = RTC.get();
-        curTime[0] = hour(tz);
+        curTime[0] = hour(tz) % 12;
         curTime[1] = minute(tz);
         curTime[2] = second(tz);
         
