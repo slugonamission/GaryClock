@@ -4,8 +4,8 @@
 uint8_t curTime[] = {0, 0, 0};
 
 uint8_t meterLoffset[12];
-uint8_t meterMoffset[59];
-uint8_t meterRoffset[59];
+uint8_t meterMoffset[60];
+uint8_t meterRoffset[60];
 
 // 7-segment displays (left, middle, right)
 //SevenSeg segL = SevenSeg();
