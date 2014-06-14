@@ -41,6 +41,7 @@ class Leds {
 		void setMode(uint8_t mode);
 		void tick(void);
 		int ledcoord(int x, int y);
+		CRGB leds[NUM_LEDS];
 
 	private:
 		void tickSmall(void);
@@ -51,7 +52,6 @@ class Leds {
 		int currentColourCountdown;
 		int currentColourOffset;
 
-		CRGB leds[NUM_LEDS];
 		uint8_t mode;
 };
 #endif
