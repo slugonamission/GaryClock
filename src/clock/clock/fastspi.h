@@ -89,3 +89,5 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SP
 #endif 
 
 #endif
+
+

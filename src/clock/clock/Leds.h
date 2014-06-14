@@ -40,6 +40,7 @@ class Leds {
 		uint8_t getMode(void) { return mode; }
 		void setMode(uint8_t mode);
 		void tick(void);
+		int ledcoord(int x, int y);
 
 	private:
 		void tickSmall(void);
@@ -54,3 +55,5 @@ class Leds {
 		uint8_t mode;
 };
 #endif
+
+

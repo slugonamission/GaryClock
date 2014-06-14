@@ -61,3 +61,5 @@ void Voltmeter::moveMultipleDamped(Voltmeter meters[], int count, int desiredPos
 	for (int i = 0; i < count; i++)
 		meters[i].move(desiredPositions[i]);
 }
+
+

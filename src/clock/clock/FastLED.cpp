@@ -77,3 +77,5 @@ void CFastLED::clear(boolean writeData) {
 		}
 	}
 }
+
+

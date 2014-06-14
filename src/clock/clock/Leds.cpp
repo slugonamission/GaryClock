@@ -190,3 +190,13 @@ void Leds::tickBatshit()
 {
 }
 
+
+//Get the ID of an LED from its coordinates
+int Leds::ledcoord(int x, int y) {
+	if(x >= LED_WIDTH) return 0;
+	switch(y) {
+		case 0: return top[x];
+		case 1: return mid[x];
+		default: return bot[x];
+	}
+}

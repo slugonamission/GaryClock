@@ -294,3 +294,5 @@ void Adafruit_7segment::printError(void) {
     writeDigitRaw(i, (i == 2 ? 0x00 : 0x40));
   }
 }
+
+

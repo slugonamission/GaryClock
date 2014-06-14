@@ -13,3 +13,5 @@ void SevenSeg::clearDisplay(void) {
 	writeDigitRaw(4, 0);
 	writeDisplay();
 }
+
+
