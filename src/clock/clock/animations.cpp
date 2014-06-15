@@ -29,9 +29,10 @@ animptr animations[NUM_ANIMS] = {
 int current_frame;
 int current_animation;
 
-void animation_tick(Leds *leds) {
-	animations[current_animation](leds, current_frame);
+boolean animation_tick(Leds *leds) {
+	boolean stillRunning = animations[current_animation](leds, current_frame);
 	current_frame++;
+	return stillRunning;
 }
 
 
@@ -49,6 +50,11 @@ int get_num_animations() {
 	return NUM_ANIMS;
 }
 
+
+void test_animation(Leds *leds, int anim) {
+	set_animation(anim);
+	while(animation_tick(leds));
+}
 
 //--------------------------------------------------------------------------
 // Utility functions
