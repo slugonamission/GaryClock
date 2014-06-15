@@ -3,44 +3,15 @@
 
 #include "Leds.h"
 
-class Animation {
-public:
-	Animation(Leds *ledsToUse);
-	virtual ~Animation();
-	/*
-	* Called by the main loop to advance to the next tick of the animation. 
-	* This function should return true if there is more animation to come.
-	* False if the animation has completed.
-	*/
-	virtual boolean tick() = 0;
-protected:
-	Leds *leds;
-	unsigned int frame;
-};
+//Tick the current animation one frame
+void animation_tick(Leds *leds);
 
-//------------------------------------------------------------------------------------------
+//Set the current animation to play. num should be less than 
+//that returned by get_num_animations()
+void set_animation(int num);
 
-class RandomTwinkle : public Animation {
-public:
-	RandomTwinkle(Leds *leds);
-	boolean tick();
-};
-
-class HueCycle : public Animation {
-public:
-	HueCycle(Leds *leds);
-	boolean tick();
-};
-
-class QuickSweep : public Animation {
-public:
-	QuickSweep(Leds *leds);
-	boolean tick();
-private:
-	int tickCount;
-	int x;
-};
-
+//Get the total number of defined animations
+int get_num_animations();
 
 
 #endif

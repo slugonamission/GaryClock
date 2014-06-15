@@ -1,12 +1,54 @@
 #include "animations.h"
 #include "leds.h"
 
-Animation::Animation(Leds *ledsToUse) {
-	leds = ledsToUse;
-	frame = 0;
+/*
+All animations must follow this prototype
+First argument is a pointer to an Leds object that it can use for LED output.
+Second argument is the current frame number. This should be set back to 0 to
+reinitialise the animation.
+*/
+
+typedef boolean (*animptr)(Leds *, int);
+
+//Currently defined animation prototypes
+#define NUM_ANIMS 3
+boolean twinkle_tick(Leds *leds, int frame);
+boolean huecycle_tick(Leds *leds, int frame);
+boolean quicksweep_tick(Leds *leds, int frame);
+
+
+//Array of pointers to animations
+animptr animations[NUM_ANIMS] = {
+	twinkle_tick, huecycle_tick, quicksweep_tick
+};
+
+
+//--------------------------------------------------------------------------
+// Interface functions
+
+int current_frame;
+int current_animation;
+
+void animation_tick(Leds *leds) {
+	animations[current_animation](leds, current_frame);
+	current_frame++;
 }
 
-Animation::~Animation() {}
+
+void set_animation(int num) {
+	if(num < NUM_ANIMS) {
+		current_animation = num;
+	} else {
+		current_animation = 0;
+	}
+
+	current_frame = 0;
+}
+
+int get_num_animations() {
+	return NUM_ANIMS;
+}
+
 
 //--------------------------------------------------------------------------
 // Utility functions
@@ -28,13 +70,9 @@ int fadeAllLeds(Leds *leds, int speed) {
 	return still_on;
 }
 
-
 //--------------------------------------------------------------------------
 
-RandomTwinkle::RandomTwinkle(Leds *leds) : Animation(leds) {}
-
-boolean RandomTwinkle::tick() {
-	frame++;
+boolean twinkle_tick(Leds *leds, int frame) {
 	if(frame < 2000) {
 		//Every so often add a new lit LED
 		if(frame % 3 == 0) {
@@ -50,11 +88,7 @@ boolean RandomTwinkle::tick() {
 
 #define HUECYCLE_MAXFRAMES 256*4 
 
-HueCycle::HueCycle(Leds *leds) : Animation(leds) {}
-
-boolean HueCycle::tick() {
-	frame++;
-
+boolean huecycle_tick(Leds *leds, int frame) {
 	int hue = (frame % 128) * 2;
 
 	int basevalue;
@@ -76,16 +110,16 @@ boolean HueCycle::tick() {
 	return frame < HUECYCLE_MAXFRAMES;
 }
 
-
 //--------------------------------------------------------------------------
 
-QuickSweep::QuickSweep(Leds *leds) : Animation(leds) {
-	tickCount = 5;
-	x = LED_WIDTH;
-}
+boolean quicksweep_tick(Leds *leds, int frame) {
+	static int tickCount;
+	static int x;
 
-boolean QuickSweep::tick() {
-	frame++;
+	if(frame == 0) {
+		tickCount = 5;
+		x = LED_WIDTH;
+	}
 
 	if(x >= 0 && x <= LED_WIDTH) {
 		tickCount++;
