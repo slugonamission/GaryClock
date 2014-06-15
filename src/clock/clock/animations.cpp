@@ -11,15 +11,16 @@ reinitialise the animation.
 typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
-#define NUM_ANIMS 3
+#define NUM_ANIMS 4
 boolean twinkle_tick(Leds *leds, int frame);
 boolean huecycle_tick(Leds *leds, int frame);
 boolean quicksweep_tick(Leds *leds, int frame);
+boolean singlepulse_tick(Leds *leds, int frame);
 
 
 //Array of pointers to animations
 animptr animations[NUM_ANIMS] = {
-	twinkle_tick, huecycle_tick, quicksweep_tick
+	twinkle_tick, huecycle_tick, quicksweep_tick, singlepulse_tick
 };
 
 
@@ -53,7 +54,9 @@ int get_num_animations() {
 
 void test_animation(Leds *leds, int anim) {
 	set_animation(anim);
-	while(animation_tick(leds));
+	while(animation_tick(leds)) {
+		delay(1);
+	}
 }
 
 //--------------------------------------------------------------------------
@@ -145,3 +148,19 @@ boolean quicksweep_tick(Leds *leds, int frame) {
 		return true;
 	} else return stillOn;
 }
+
+//--------------------------------------------------------------------------
+
+boolean singlepulse_tick(Leds *leds, int frame) {
+	static int hue;
+	if(frame == 0) hue = random(256);
+
+	int value;
+	if(frame < 512) abs(256-frame);
+	else value = 0;
+
+	for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value);
+	FastLED.show();
+	return (frame < 512);
+}
+
