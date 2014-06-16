@@ -11,7 +11,7 @@ reinitialise the animation.
 typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
-#define NUM_ANIMS 10
+#define NUM_ANIMS 12
 boolean twinkle(Leds *leds, int frame);
 boolean huecycle(Leds *leds, int frame);
 boolean quicksweep(Leds *leds, int frame);
@@ -21,7 +21,9 @@ boolean wipe(Leds *leds, int frame);
 boolean wave1(Leds *leds, int frame);
 boolean wave2(Leds *leds, int frame);
 boolean slowtwinkle(Leds *leds, int frame);
-boolean scrolltext(Leds* leds, int frame);
+boolean scrolltext(Leds *leds, int frame);
+boolean blinds_fast(Leds *leds, int frame);
+boolean blinds_slow(Leds *leds, int frame);
 
 //Array of pointers to animations
 animptr animations[NUM_ANIMS] = {
@@ -35,6 +37,8 @@ animptr animations[NUM_ANIMS] = {
 	wave2, //7
 	slowtwinkle, //8
 	scrolltext, //9
+	blinds_fast, //10
+	blinds_slow, //11
 };
 
 
@@ -51,13 +55,13 @@ boolean animation_tick(Leds *leds) {
 }
 
 
-void set_animation(int num) {
+void set_animation(Leds *leds, int num) {
 	if(num < NUM_ANIMS) {
 		current_animation = num;
 	} else {
 		current_animation = 0;
 	}
-
+	leds->turnAllOff();
 	current_frame = 0;
 }
 
@@ -67,7 +71,8 @@ int get_num_animations() {
 
 
 void test_animation(Leds *leds, int anim) {
-	set_animation(anim);
+	leds->turnAllOff();
+	set_animation(leds, anim);
 	while(animation_tick(leds)) {
 		delay(10);
 	}
@@ -253,40 +258,29 @@ boolean wave2(Leds* leds, int frame) {
 
 //--------------------------------------------------------------------------
 
-char tmtop[] = "***  ***  * *  ***  * *  ***  ***  ***  *** "; 
-char tmmid[] = " *   * *  * *  *    ***  ***  * *  **   **  ";
-char tmbot[] = " *   ***  ***  ***  * *  * *  ***  * *  *** ";
+char tm[3][45] = {	"***  ***  * *  ***  * *  ***  ***  ***  *** ",
+					" *   * *  * *  *    ***  ***  * *  **   **  ",
+					" *   ***  ***  ***  * *  * *  ***  * *  *** "};
 
-boolean scrolltext(Leds* leds, int frame) {
+boolean scrolltext(Leds *leds, int frame) {
 	static int slen;
 	static int pos = 0;
 
 	if(frame == 0) {
-		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CRGB(0, 0, 0);
 		pos = 0;
-		slen = strlen(tmtop);
+		slen = strlen(tm[0]);
 	}
 
 	for(int x = 0; x < LED_WIDTH; x++) {
 		int offset = x + (pos - slen);
 
 		if(offset >= 0 && offset < slen) {
-			if(tmtop[offset] != ' ') {
-				leds->setLed(x, 0, CRGB(255, 255, 255));
-			} else {
-				leds->setLed(x, 0, CRGB(0, 0, 0));
-			}
-
-			if(tmmid[offset] != ' ') {
-				leds->setLed(x, 1, CRGB(255, 255, 255));
-			} else {
-				leds->setLed(x, 1, CRGB(0, 0, 0));
-			}
-
-			if(tmbot[offset] != ' ') {
-				leds->setLed(x, 2, CRGB(255, 255, 255));
-			} else {
-				leds->setLed(x, 2, CRGB(0, 0, 0));
+			for(int y = 0; y < 3; y++) {
+				if(tm[y][offset] != ' ') {
+					leds->setLed(x, y, CHSV((offset / 5)*(255/5), 255, 255));
+				} else {
+					leds->setLed(x, y, CHSV(0, 0, 0));
+				}
 			}
 		}
 	}
@@ -297,6 +291,39 @@ boolean scrolltext(Leds* leds, int frame) {
 	return pos < slen * 2 + LED_WIDTH;
 }
 
+//--------------------------------------------------------------------------
 
+boolean blinds_int(Leds *leds, int frame, boolean fast) {
+	static int pos;
+	static int loops;
 
+	if(frame == 0) {
+		pos = 0;
+		loops = fast ? 2 : 1;
+	}
 
+	int hue = round(((float) pos / 10.0) * 255.0);
+	leds->setLed(pos, 0, CHSV(hue, 255, 255));
+	leds->setLed(LED_WIDTH-pos, 1, CHSV(hue, 255, 255));
+	leds->setLed(pos, 2, CHSV(hue, 255, 255));
+
+	if(fast || frame % 2 == 0) pos++;
+
+	if(pos == LED_WIDTH && loops > 1) {
+		loops = 1;
+		pos = 0;
+	}
+
+	boolean stillOn = fadeAllLeds(leds, fast ? 50 : 10);
+	FastLED.show();
+
+	return (pos < 10 || stillOn);
+}
+
+boolean blinds_fast(Leds *leds, int frame) {
+	blinds_int(leds, frame, true);
+}
+
+boolean blinds_slow(Leds *leds, int frame) {
+	blinds_int(leds, frame, false);
+}

@@ -153,11 +153,13 @@ void setup() {
 		delay(500);
 	}*/
 
-	test_animation(&leds, 9);
+	test_animation(&leds, 10);
 	delay(500);
-	test_animation(&leds, 9);
+	test_animation(&leds, 11);
 	delay(500);	
-	test_animation(&leds, 9);
+	test_animation(&leds, 10);
+	delay(500);	
+	test_animation(&leds, 11);
 
 	// Get the current time from RTC
 	time_t tz = RTC.get(); 
