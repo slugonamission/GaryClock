@@ -7,7 +7,7 @@
 #define HOURS_PIN 9
 int allHands[] = {SECS_PIN, MINS_PIN, HOURS_PIN};
 
-#define TICK_TIME 1000
+#define TICK_TIME 4000
 
 // Damping parameters
 #define USE_DAMPING   1
@@ -32,11 +32,11 @@ void setup() {
 void loop() {
 
   // 5V ticks
-  ticks(1);
+  //ticks(1);
 
   // 2.5V ticks
   ticks(2);
- 
+ /*
   // 1V ticks
   ticks(5);
 
@@ -79,7 +79,7 @@ void loop() {
     analogWrite(SECS_PIN, 0);
     delay(235);
   #endif
-  
+  */
 }
 
 

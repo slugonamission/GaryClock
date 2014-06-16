@@ -52,13 +52,11 @@ static const uint8_t numbertable[] = {
 };
 
 void setup() {
-#ifndef __AVR_ATtiny85__
-  Serial.begin(9600);
-  Serial.println("7 Segment Backpack Test");
-#endif
-  matrix1.begin(0x72);
+  pinMode(3, INPUT);
+
+  matrix1.begin(0x70);
   matrix2.begin(0x71);
-  matrix3.begin(0x70);
+  matrix3.begin(0x72);
 
 /*
   matrix1.print(0x0123, HEX);
@@ -88,10 +86,53 @@ void setup() {
   matrix1.writeDisplay();
   matrix2.writeDisplay();
   matrix3.writeDisplay();
+
+  delay(1000);
 }
 
 void loop() {
-
+/*
+  if (digitalRead(3)){
+    matrix1.writeDigitRaw(0, 0x00);
+    matrix1.writeDigitRaw(1, 0x00);
+    matrix1.writeDigitRaw(2, 0x00);
+    matrix1.writeDigitRaw(3, 0x00);
+    matrix1.writeDigitRaw(4, 0x00);
+    matrix2.writeDigitRaw(0, 0x00);
+    matrix2.writeDigitRaw(1, 0x00);
+    matrix2.writeDigitRaw(2, 0x00);
+    matrix2.writeDigitRaw(3, 0xFF);
+    matrix2.writeDigitRaw(4, 0xFF);
+    matrix3.writeDigitRaw(0, 0xFF);
+    matrix3.writeDigitRaw(1, 0xFF);
+    matrix3.writeDigitRaw(2, 0x00);
+    matrix3.writeDigitRaw(3, 0xFF);
+    matrix3.writeDigitRaw(4, 0xFF);
+    matrix1.writeDisplay();
+    matrix2.writeDisplay();
+    matrix3.writeDisplay();
+  }
+  else {
+    matrix1.writeDigitRaw(0, 0xFF);
+    matrix1.writeDigitRaw(1, 0xFF);
+    matrix1.writeDigitRaw(2, 0x00);
+    matrix1.writeDigitRaw(3, 0xFF);
+    matrix1.writeDigitRaw(4, 0xFF);
+    matrix2.writeDigitRaw(0, 0xFF);
+    matrix2.writeDigitRaw(1, 0xFF);
+    matrix2.writeDigitRaw(2, 0x00);
+    matrix2.writeDigitRaw(3, 0x00);
+    matrix2.writeDigitRaw(4, 0x00);
+    matrix3.writeDigitRaw(0, 0x00);
+    matrix3.writeDigitRaw(1, 0x00);
+    matrix3.writeDigitRaw(2, 0x00);
+    matrix3.writeDigitRaw(3, 0x00);
+    matrix3.writeDigitRaw(4, 0x00);
+    matrix1.writeDisplay();
+    matrix2.writeDisplay();
+    matrix3.writeDisplay();
+  }
+*/
 /*
   for (int i = 0; i < 15; i++) {
     matrix1.setBrightness(i);
@@ -108,7 +149,7 @@ void loop() {
   }
   */
 
-  /*
+  
   // try to print a number thats too long
   matrix1.print(10000, DEC);
   matrix1.writeDisplay();
@@ -116,22 +157,18 @@ void loop() {
   matrix2.writeDisplay();
   matrix3.print(10000, DEC);
   matrix3.writeDisplay();
-  delay(500);
-Serial.println("test");
-  // print a hex number
-
-  delay(500);
+  delay(1000);
 
 
   // print with print/println
-  for (uint16_t counter = 0; counter < 9999; counter++) {
-    matrix1.println(counter);
-    matrix1.writeDisplay();
-    matrix2.println(counter);
-    matrix2.writeDisplay();
-    matrix3.println(counter);
+  for (uint32_t counter = 0; counter < 99999999; counter++) {
+    matrix3.println(counter % 10000);
     matrix3.writeDisplay();
-    delay(10);
+    matrix2.println((counter - (counter % 10000)) / 10000);
+    matrix2.writeDisplay();
+    //matrix3.println(counter);
+    //matrix3.writeDisplay();
+    //delay(10);
   }
 
   // method #2 - draw each digit
@@ -167,5 +204,5 @@ Serial.println("test");
     matrix3.writeDisplay();
     delay(10);
   }
-  */
+  
 }
