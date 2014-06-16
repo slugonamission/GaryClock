@@ -11,7 +11,7 @@ reinitialise the animation.
 typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
-#define NUM_ANIMS 9
+#define NUM_ANIMS 10
 boolean twinkle(Leds *leds, int frame);
 boolean huecycle(Leds *leds, int frame);
 boolean quicksweep(Leds *leds, int frame);
@@ -21,6 +21,7 @@ boolean wipe(Leds *leds, int frame);
 boolean wave1(Leds *leds, int frame);
 boolean wave2(Leds *leds, int frame);
 boolean slowtwinkle(Leds *leds, int frame);
+boolean scrolltext(Leds* leds, int frame);
 
 //Array of pointers to animations
 animptr animations[NUM_ANIMS] = {
@@ -33,6 +34,7 @@ animptr animations[NUM_ANIMS] = {
 	wave1, //6
 	wave2, //7
 	slowtwinkle, //8
+	scrolltext, //9
 };
 
 
@@ -251,17 +253,48 @@ boolean wave2(Leds* leds, int frame) {
 
 //--------------------------------------------------------------------------
 
-char tmtop = "***  ***  * *  ***  * *  ***  ***  ***  ***"; 
-char tmmid = " *   * *  * *  *    ***  ***  * *  **   ** ";
-char tmbot = " *   ***  ***  ***  * *  * *  ***  * *  ***";
-
-#define SCOLL_OFFSET 43
+char tmtop[] = "***  ***  * *  ***  * *  ***  ***  ***  *** "; 
+char tmmid[] = " *   * *  * *  *    ***  ***  * *  **   **  ";
+char tmbot[] = " *   ***  ***  ***  * *  * *  ***  * *  *** ";
 
 boolean scrolltext(Leds* leds, int frame) {
-	static pos = 0;
+	static int slen;
+	static int pos = 0;
 
-	if(frame == 0) pos = 0;
+	if(frame == 0) {
+		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CRGB(0, 0, 0);
+		pos = 0;
+		slen = strlen(tmtop);
+	}
 
+	for(int x = 0; x < LED_WIDTH; x++) {
+		int offset = x + (pos - slen);
+
+		if(offset >= 0 && offset < slen) {
+			if(tmtop[offset] != ' ') {
+				leds->setLed(x, 0, CRGB(255, 255, 255));
+			} else {
+				leds->setLed(x, 0, CRGB(0, 0, 0));
+			}
+
+			if(tmmid[offset] != ' ') {
+				leds->setLed(x, 1, CRGB(255, 255, 255));
+			} else {
+				leds->setLed(x, 1, CRGB(0, 0, 0));
+			}
+
+			if(tmbot[offset] != ' ') {
+				leds->setLed(x, 2, CRGB(255, 255, 255));
+			} else {
+				leds->setLed(x, 2, CRGB(0, 0, 0));
+			}
+		}
+	}
+
+	if(frame % 5 == 0) pos++;
+
+	FastLED.show();
+	return pos < slen * 2 + LED_WIDTH;
 }
 
 

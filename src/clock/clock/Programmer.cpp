@@ -63,7 +63,7 @@ bool Programmer::setLedMode(uint8_t mode)
   return true;
 }
 
-bool Programmer::getLedMode(uint8_t& mode)
+bool Programmer::getLedMode(uint8_t *mode)
 {
   Wire.beginTransmission(i2c_addr);
   Wire.write((uint8_t)LED_REG);
@@ -73,7 +73,7 @@ bool Programmer::getLedMode(uint8_t& mode)
   Wire.requestFrom((uint8_t)i2c_addr, (uint8_t)1);
   if (Wire.available() < 1) return false;
   
-  mode = Wire.read();
+  *mode = Wire.read();
   
   return true;
 }

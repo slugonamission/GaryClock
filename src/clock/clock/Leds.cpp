@@ -210,3 +210,12 @@ void Leds::setLed(int x, int y, CHSV hsv) {
 	if(y >= 3) return;
 	leds[ledcoord(x, y)] = hsv;
 }
+
+void Leds::setLed(int x, int y, CRGB rgb) {
+	if(x < 0) return;
+	if(x >= LED_WIDTH) return;
+	if(y < 0) return;
+	if(y >= 3) return;
+	leds[ledcoord(x, y)] = rgb;
+}
+

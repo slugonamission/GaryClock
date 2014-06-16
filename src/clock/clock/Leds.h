@@ -43,6 +43,7 @@ class Leds {
 		void tick(void);
 		int ledcoord(int x, int y);
 		void setLed(int x, int y, CHSV hsv);
+		void setLed(int x, int y, CRGB rgb);
 		CRGB leds[NUM_LEDS];
 
 	private:
