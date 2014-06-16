@@ -3,18 +3,18 @@
 
 uint8_t curTime[] = {0, 0, 0};
 
-uint8_t meterLoffset[12];
+uint8_t meterHoffset[12];
 uint8_t meterMoffset[60];
-uint8_t meterRoffset[60];
+uint8_t meterSoffset[60];
 
 // 7-segment displays (left, middle, right)
 //SevenSeg segL = SevenSeg();
 //SevenSeg segM = SevenSeg();
 //SevenSeg segR = SevenSeg();
 
-Voltmeter meterL = Voltmeter();
+Voltmeter meterH = Voltmeter();
 Voltmeter meterM = Voltmeter();
-Voltmeter meterR = Voltmeter();
+Voltmeter meterS = Voltmeter();
 Voltmeter allMeters[3];
 int metersToUpdate = 0;
 int meterPositions[3];
@@ -56,7 +56,7 @@ void rtcTick()
 			}
 
 			metersToUpdate++;
-			meterPositions[2] = meterLoffset[curTime[0]];
+			meterPositions[2] = meterHoffset[curTime[0]];
 		}
 
 		metersToUpdate++;
@@ -64,7 +64,7 @@ void rtcTick()
 	}
 
 	metersToUpdate++;
-	meterPositions[0] = meterRoffset[curTime[2]];
+	meterPositions[0] = meterSoffset[curTime[2]];
 }
 
 void setup() {
@@ -72,12 +72,12 @@ void setup() {
 	delay(1000);
 
 	// Set up voltmeters
-	meterL.begin(METERL_PIN);
-	meterM.begin(METERM_PIN);
-	meterR.begin(METERR_PIN);
-	allMeters[0] = meterR;
+	meterH.begin(METER_MID_PIN);
+	meterM.begin(METER_LEFT_PIN);
+	meterS.begin(METER_RIGHT_PIN);
+	allMeters[0] = meterS;
 	allMeters[1] = meterM;
-	allMeters[2] = meterL;
+	allMeters[2] = meterH;
 
 	// Set up displays
 	//segL.begin(SEGL_ADDR);
@@ -100,7 +100,7 @@ void setup() {
 	{
 		float tmp = 255.0f / 11.0f;
 		tmp = tmp * (float)i;
-		meterLoffset[i] = (uint8_t)tmp;
+		meterHoffset[i] = (uint8_t)tmp;
 	}
 
 	for (int i = 0; i < 60; i++)
@@ -114,7 +114,7 @@ void setup() {
 	{
 		float tmp = 255.0f / 59.0f;
 		tmp = tmp * (float)i;
-		meterRoffset[i] = (uint8_t)tmp;
+		meterSoffset[i] = (uint8_t)tmp;
 	}
 	
 
@@ -147,9 +147,9 @@ void setup() {
 	curTime[2] = second(tz);
 
 	// Set the voltmeters
-	meterPositions[0] = meterRoffset[curTime[2]];
+	meterPositions[0] = meterSoffset[curTime[2]];
 	meterPositions[1] = meterMoffset[curTime[1]];
-	meterPositions[2] = meterLoffset[curTime[0]];
+	meterPositions[2] = meterHoffset[curTime[0]];
 	Voltmeter::moveMultipleDamped(allMeters, 3, meterPositions);
 
 
@@ -202,9 +202,9 @@ void loop() {
 			tz.Second = curTime[2];
 			RTC.write(tz);
 
-			meterPositions[0] = meterRoffset[curTime[2]];
+			meterPositions[0] = meterSoffset[curTime[2]];
 			meterPositions[1] = meterMoffset[curTime[1]];
-			meterPositions[2] = meterLoffset[curTime[0]];
+			meterPositions[2] = meterHoffset[curTime[0]];
 			Voltmeter::moveMultipleDamped(allMeters, 3, meterPositions);
 			metersToUpdate = 0;
 		}
