@@ -11,17 +11,23 @@ reinitialise the animation.
 typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
-#define NUM_ANIMS 5
-boolean twinkle_tick(Leds *leds, int frame);
-boolean huecycle_tick(Leds *leds, int frame);
-boolean quicksweep_tick(Leds *leds, int frame);
-boolean singlepulse_tick(Leds *leds, int frame);
-boolean white_twinkle(Leds *leds, int frame);
+#define NUM_ANIMS 6
+boolean twinkle(Leds *leds, int frame);
+boolean huecycle(Leds *leds, int frame);
+boolean quicksweep(Leds *leds, int frame);
+boolean singlepulse(Leds *leds, int frame);
+boolean whitetwinkle(Leds *leds, int frame);
+boolean wipe(Leds *leds, int frame);
 
 
 //Array of pointers to animations
 animptr animations[NUM_ANIMS] = {
-	twinkle_tick, huecycle_tick, quicksweep_tick, singlepulse_tick, white_twinkle
+	twinkle, //0
+	huecycle, //1
+	quicksweep, //2
+	singlepulse, //3
+	whitetwinkle, //4
+	wipe //5
 };
 
 
@@ -82,7 +88,7 @@ int fadeAllLeds(Leds *leds, int speed) {
 
 //--------------------------------------------------------------------------
 
-boolean twinkle_tick(Leds *leds, int frame) {
+boolean twinkle(Leds *leds, int frame) {
 	if(frame < 200) {
 		//Every so often add a new lit LED
 		if(frame % 2 == 0) {
@@ -96,18 +102,18 @@ boolean twinkle_tick(Leds *leds, int frame) {
 
 //--------------------------------------------------------------------------
 
-#define HUECYCLE_MAXFRAMES 256*4 
+#define HUECYCLE_MAXFRAMES 256
 
-boolean huecycle_tick(Leds *leds, int frame) {
+boolean huecycle(Leds *leds, int frame) {
 	int hue = (frame % 128) * 2;
 
 	int basevalue;
-	if(frame < 256) basevalue = frame;
-	else if(frame > HUECYCLE_MAXFRAMES - 256) basevalue = HUECYCLE_MAXFRAMES - frame;
+	if(frame < 64) basevalue = frame * 4;
+	else if(frame > HUECYCLE_MAXFRAMES - 64) basevalue = (HUECYCLE_MAXFRAMES - frame) * 4;
 	else basevalue = 255;
 
 	for(int x = 0; x < LED_WIDTH; x++) {
-		int value = basevalue - (abs(5 - x) * 10);
+		int value = basevalue - (abs(6 - x) * 10);
 		if (value < 0) value = 0;
 
 		for(int y = 0; y < LED_HEIGHT; y++) {
@@ -122,7 +128,7 @@ boolean huecycle_tick(Leds *leds, int frame) {
 
 //--------------------------------------------------------------------------
 
-boolean quicksweep_tick(Leds *leds, int frame) {
+boolean quicksweep(Leds *leds, int frame) {
 	static int tickCount;
 	static int x;
 
@@ -152,7 +158,7 @@ boolean quicksweep_tick(Leds *leds, int frame) {
 
 //--------------------------------------------------------------------------
 
-boolean singlepulse_tick(Leds *leds, int frame) {
+boolean singlepulse(Leds *leds, int frame) {
 	static int hue;
 	if(frame == 0) hue = random(256);
 
@@ -165,7 +171,7 @@ boolean singlepulse_tick(Leds *leds, int frame) {
 
 //--------------------------------------------------------------------------
 
-boolean white_twinkle(Leds *leds, int frame) {
+boolean whitetwinkle(Leds *leds, int frame) {
 	if(frame < 150) {
 		//Every so often add a new lit LED
 		leds->leds[random(NUM_LEDS)] = CRGB(255, 255, 255);
@@ -174,3 +180,30 @@ boolean white_twinkle(Leds *leds, int frame) {
 	FastLED.show();
 	return stillOn;
 }
+
+//--------------------------------------------------------------------------
+
+boolean wipe(Leds *leds, int frame) {
+	static int progress;
+	static int hue;
+	if(frame == 0) {
+		progress = -3;
+		hue = random(256);
+	}
+
+	if(progress <= LED_WIDTH) {
+		if(frame % 2 == 0) progress++;
+		for(int x = -1; x < progress; x++) {
+			leds->setLed(x+1, 0, CHSV(hue, 255, 255));
+			leds->setLed(x, 1, CHSV(hue, 255, 255));
+			leds->setLed(x-1, 2, CHSV(hue, 255, 255));
+		}
+	}
+
+	boolean stillOn = fadeAllLeds(leds, 2);
+	FastLED.show();
+	return (frame < 100 || stillOn);
+}
+
+
+

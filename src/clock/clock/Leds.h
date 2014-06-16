@@ -41,6 +41,7 @@ class Leds {
 		void setMode(uint8_t mode);
 		void tick(void);
 		int ledcoord(int x, int y);
+		void setLed(int x, int y, CHSV hsv);
 		CRGB leds[NUM_LEDS];
 
 	private:
