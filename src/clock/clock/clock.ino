@@ -1,5 +1,11 @@
 #include "clock.h"
+#include "DS1307RTC.h"
+#include "SevenSeg.h"
+#include "Voltmeter.h"
+#include "Leds.h"
+#include "Programmer.h"
 #include "animations.h"
+#include <EEPROM.h>
 #include <Wire.h>
 
 uint8_t curTime[] = {0, 0, 0};
@@ -90,7 +96,8 @@ void setup() {
 	// TODO: Set up button interrupt
 
 	// Set up LEDs
-	leds.begin();
+	uint8_t ledMode = EEPROM.read(EEPROM_LEDMODE);
+	leds.begin(ledMode);
 
 	// Set up programmer
 	programmer.begin(PROG_ADDR);
@@ -222,8 +229,10 @@ void loop() {
 		}
 		else if (programmer.getLedMode(nextLed)) // Only need to do this if the world isn't stopped, hence there's a chance the user is on the LED page.
 		{
-			if (nextLed != leds.getMode())
+			if (nextLed != leds.getMode()) {
 				leds.setMode(nextLed);
+				EEPROM.write(EEPROM_LEDMODE, nextLed);
+			}
 		}
 		else
 		{

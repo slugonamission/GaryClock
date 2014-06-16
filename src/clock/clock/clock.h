@@ -1,12 +1,6 @@
 #ifndef __CLOCK_H__
 #define __CLOCK_H__
 
-#include "DS1307RTC.h"
-#include "SevenSeg.h"
-#include "Voltmeter.h"
-#include "Leds.h"
-#include "Programmer.h"
-
 
 #define RTC_ADDR 0x68
 
@@ -24,7 +18,7 @@
 
 //#define LEDS_PIN 6 // (actually defined in Leds.h)
 
+#define EEPROM_LEDMODE 0
+
+
 #endif
-
-
-
