@@ -11,7 +11,7 @@ reinitialise the animation.
 typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
-#define NUM_ANIMS 13
+#define NUM_ANIMS 14
 boolean twinkle(Leds *leds, int frame);
 boolean huecycle(Leds *leds, int frame);
 boolean quicksweep(Leds *leds, int frame);
@@ -25,6 +25,7 @@ boolean scrolltext(Leds *leds, int frame);
 boolean blinds_fast(Leds *leds, int frame);
 boolean blinds_slow(Leds *leds, int frame);
 boolean colourwipe(Leds *leds, int frame);
+boolean cylon(Leds *leds, int frame);
 
 //Array of pointers to animations
 //Wastes some memory, but forms a jump table for the interface functions
@@ -42,6 +43,7 @@ animptr animations[NUM_ANIMS] = {
 	blinds_fast, //10
 	blinds_slow, //11
 	colourwipe, //12
+	cylon, //13
 };
 
 
@@ -97,7 +99,6 @@ int fadeAllLeds(Leds *leds, int speed) {
 			}
 		}
 	}
-	FastLED.show();
 	return still_on;
 }
 
@@ -183,15 +184,19 @@ boolean quicksweep(Leds *leds, int frame) {
 
 //--------------------------------------------------------------------------
 
+#define SP_FRAMES 70
+
 boolean singlepulse(Leds *leds, int frame) {
 	static int hue;
 	if(frame == 0) hue = random(256);
 
-	int value = frame < 128 ? constrain(255-(abs(64 - frame) * 4), 0, 255) : 0;
+	int value = frame < SP_FRAMES
+		? round(((float) (SP_FRAMES/2 - abs((SP_FRAMES / 2) - frame)) / (float) SP_FRAMES) * 255) 
+		: 0;
 
 	for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value);
 	FastLED.show();
-	return (frame < 128);
+	return (frame < SP_FRAMES);
 }
 
 //--------------------------------------------------------------------------
@@ -377,6 +382,17 @@ boolean colourwipe(Leds *leds, int frame) {
 	return (wipenum < COLOURWIPE_NUMWIPES || stillOn);
 }
 
-//--------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 
+#define CYLON_LOOPFRAMES 150
+#define CYLON_TOTALFRAMES 300
 
+boolean cylon(Leds *leds, int frame) {
+	if(frame < CYLON_TOTALFRAMES-1) {
+		int x = round(sin((float)frame / (float)CYLON_LOOPFRAMES * 2 * PI) * (LED_WIDTH-1));
+		leds->setLed(x, 1, CRGB(128, 0, 0)); 
+	}
+	boolean stillOn = fadeAllLeds(leds, 5);
+	FastLED.show();
+	return (frame < CYLON_TOTALFRAMES || stillOn);
+}
