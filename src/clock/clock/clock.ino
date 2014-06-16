@@ -148,18 +148,18 @@ void setup() {
 	// Test LEDs
 	//leds.introAnimation();
 
-	/*for(int i = 0; i < get_num_animations(); i++) {
+	for(int i = 0; i < get_num_animations(); i++) {
 		test_animation(&leds, i);
 		delay(500);
-	}*/
+	}
 
-	test_animation(&leds, 10);
+	/*test_animation(&leds, 12);
 	delay(500);
-	test_animation(&leds, 11);
+	test_animation(&leds, 12);
 	delay(500);	
-	test_animation(&leds, 10);
+	test_animation(&leds, 12);
 	delay(500);	
-	test_animation(&leds, 11);
+	test_animation(&leds, 12);*/
 
 	// Get the current time from RTC
 	time_t tz = RTC.get(); 

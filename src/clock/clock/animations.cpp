@@ -11,7 +11,7 @@ reinitialise the animation.
 typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
-#define NUM_ANIMS 12
+#define NUM_ANIMS 13
 boolean twinkle(Leds *leds, int frame);
 boolean huecycle(Leds *leds, int frame);
 boolean quicksweep(Leds *leds, int frame);
@@ -24,8 +24,10 @@ boolean slowtwinkle(Leds *leds, int frame);
 boolean scrolltext(Leds *leds, int frame);
 boolean blinds_fast(Leds *leds, int frame);
 boolean blinds_slow(Leds *leds, int frame);
+boolean colourwipe(Leds *leds, int frame);
 
 //Array of pointers to animations
+//Wastes some memory, but forms a jump table for the interface functions
 animptr animations[NUM_ANIMS] = {
 	twinkle, //0
 	huecycle, //1
@@ -39,6 +41,7 @@ animptr animations[NUM_ANIMS] = {
 	scrolltext, //9
 	blinds_fast, //10
 	blinds_slow, //11
+	colourwipe, //12
 };
 
 
@@ -105,12 +108,7 @@ boolean twinkle_int(Leds *leds, int frame, boolean randcol, boolean slow) {
 		if(randcol) leds->leds[random(NUM_LEDS)] = CHSV(random(256), 255, 255);
 		else leds->leds[random(NUM_LEDS)] = CRGB(255, 255, 255);
 	}
-	boolean stillOn;
-	if(slow) {
-		stillOn = fadeAllLeds(leds, 2);
-	} else {
-		stillOn = fadeAllLeds(leds, 10);
-	}
+	boolean stillOn = fadeAllLeds(leds, slow ? 2 : 10);
 	FastLED.show();
 	return stillOn;
 }
@@ -258,9 +256,9 @@ boolean wave2(Leds* leds, int frame) {
 
 //--------------------------------------------------------------------------
 
-char tm[3][45] = {	"***  ***  * *  ***  * *  ***  ***  ***  *** ",
-					" *   * *  * *  *    ***  ***  * *  **   **  ",
-					" *   ***  ***  ***  * *  * *  ***  * *  *** "};
+char tm[3][38] = {	"*** *** * * *** * * *** *** *** *** ",
+					" *  * * * * *   *** *** * * **  **  ",
+					" *  *** *** *** * * * * *** * * *** "};
 
 boolean scrolltext(Leds *leds, int frame) {
 	static int slen;
@@ -277,7 +275,7 @@ boolean scrolltext(Leds *leds, int frame) {
 		if(offset >= 0 && offset < slen) {
 			for(int y = 0; y < 3; y++) {
 				if(tm[y][offset] != ' ') {
-					leds->setLed(x, y, CHSV((offset / 5)*(255/5), 255, 255));
+					leds->setLed(x, y, CHSV((offset / 4)*(255/5), 255, 255));
 				} else {
 					leds->setLed(x, y, CHSV(0, 0, 0));
 				}
@@ -327,3 +325,58 @@ boolean blinds_fast(Leds *leds, int frame) {
 boolean blinds_slow(Leds *leds, int frame) {
 	blinds_int(leds, frame, false);
 }
+
+//--------------------------------------------------------------------------
+
+#define COLOURWIPE_INTERDELAY 10
+#define COLOURWIPE_NUMWIPES 4
+
+boolean colourwipe(Leds *leds, int frame) {
+	static int wipepos;
+	static int wipenum;
+	boolean stillOn;
+
+	if(frame == 0) {
+		wipepos = 0;
+		wipenum = 0;
+	}
+
+	if(wipenum < COLOURWIPE_NUMWIPES) {
+		stillOn = true;
+
+		if(wipepos < LED_WIDTH) {
+			for(int y = 0; y < 3; y++) {
+				switch(wipenum) {
+					case 0:	
+						leds->leds[leds->ledcoord(wipepos, y)].r += 255;
+						break;
+					case 1:	
+						leds->leds[leds->ledcoord((LED_WIDTH - 1) - wipepos, y)].g += 255;
+						break;
+					case 2:
+						leds->leds[leds->ledcoord(wipepos, y)].r = 0;
+						leds->leds[leds->ledcoord(wipepos, y)].b += 255;
+						break;
+					case 3:
+						leds->leds[leds->ledcoord((LED_WIDTH - 1) - wipepos, y)].r += 255;
+						break;
+				}
+			}
+		}
+
+		if(frame % 2 == 0) wipepos++;
+		if(wipepos >= LED_WIDTH + COLOURWIPE_INTERDELAY) {
+			wipepos = 0;
+			wipenum++;
+		}		
+	} else {
+		stillOn = fadeAllLeds(leds, 8);
+	}
+
+	FastLED.show();
+	return (wipenum < COLOURWIPE_NUMWIPES || stillOn);
+}
+
+//--------------------------------------------------------------------------
+
+
