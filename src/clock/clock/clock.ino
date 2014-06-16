@@ -1,4 +1,5 @@
 #include "clock.h"
+#include "animations.h"
 #include <Wire.h>
 
 uint8_t curTime[] = {0, 0, 0};
@@ -138,7 +139,13 @@ void setup() {
 	delay(1000);
 
 	// Test LEDs
-	leds.introAnimation();
+	//leds.introAnimation();
+
+	test_animation(&leds, 2);
+	delay(500);
+	test_animation(&leds, 2);
+	delay(500);	
+	test_animation(&leds, 2);
 
 	// Get the current time from RTC
 	time_t tz = RTC.get(); 

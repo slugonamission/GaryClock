@@ -11,16 +11,17 @@ reinitialise the animation.
 typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
-#define NUM_ANIMS 4
+#define NUM_ANIMS 5
 boolean twinkle_tick(Leds *leds, int frame);
 boolean huecycle_tick(Leds *leds, int frame);
 boolean quicksweep_tick(Leds *leds, int frame);
 boolean singlepulse_tick(Leds *leds, int frame);
+boolean white_twinkle(Leds *leds, int frame);
 
 
 //Array of pointers to animations
 animptr animations[NUM_ANIMS] = {
-	twinkle_tick, huecycle_tick, quicksweep_tick, singlepulse_tick
+	twinkle_tick, huecycle_tick, quicksweep_tick, singlepulse_tick, white_twinkle
 };
 
 
@@ -55,7 +56,7 @@ int get_num_animations() {
 void test_animation(Leds *leds, int anim) {
 	set_animation(anim);
 	while(animation_tick(leds)) {
-		delay(1);
+		delay(10);
 	}
 }
 
@@ -82,13 +83,13 @@ int fadeAllLeds(Leds *leds, int speed) {
 //--------------------------------------------------------------------------
 
 boolean twinkle_tick(Leds *leds, int frame) {
-	if(frame < 2000) {
+	if(frame < 200) {
 		//Every so often add a new lit LED
-		if(frame % 3 == 0) {
+		if(frame % 2 == 0) {
 			leds->leds[random(NUM_LEDS)] = CHSV(random(256), 255, 255);
 		}
 	}
-	boolean stillOn = fadeAllLeds(leds, 1);
+	boolean stillOn = fadeAllLeds(leds, 3);
 	FastLED.show();
 	return stillOn;
 }
@@ -155,12 +156,21 @@ boolean singlepulse_tick(Leds *leds, int frame) {
 	static int hue;
 	if(frame == 0) hue = random(256);
 
-	int value;
-	if(frame < 512) abs(256-frame);
-	else value = 0;
+	int value = frame < 128 ? constrain(255-(abs(64 - frame) * 4), 0, 255) : 0;
 
 	for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value);
 	FastLED.show();
-	return (frame < 512);
+	return (frame < 128);
 }
 
+//--------------------------------------------------------------------------
+
+boolean white_twinkle(Leds *leds, int frame) {
+	if(frame < 150) {
+		//Every so often add a new lit LED
+		leds->leds[random(NUM_LEDS)] = CRGB(255, 255, 255);
+	}
+	boolean stillOn = fadeAllLeds(leds, 10);
+	FastLED.show();
+	return stillOn;
+}
