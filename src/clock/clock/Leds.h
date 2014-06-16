@@ -1,5 +1,6 @@
 #ifndef __LEDS_H__
 #define __LEDS_H__
+
 #include "Arduino.h"
 #include "FastLED.h"
 
@@ -55,7 +56,5 @@ class Leds {
 
 		uint8_t mode;
 };
+
 #endif
-
-
-

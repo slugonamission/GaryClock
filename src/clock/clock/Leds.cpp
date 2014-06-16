@@ -2,6 +2,7 @@
 
 
 Leds::Leds() {
+	mode = LEDMODE_OFF;
 	currentColourOffset = 0;
 	currentColourCountdown = LEDMODE_COLOUR_COUNTDOWN;
 }
