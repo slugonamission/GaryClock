@@ -99,8 +99,11 @@ boolean twinkle_int(Leds *leds, int frame, boolean randcol, boolean slow) {
 		else leds->leds[random(NUM_LEDS)] = CRGB(255, 255, 255);
 	}
 	boolean stillOn;
-	if(!slow) stillOn = fadeAllLeds(leds, 10);
-	else stillOn = fadeAllLeds(leds, 1);
+	if(slow) {
+		stillOn = fadeAllLeds(leds, 2);
+	} else {
+		stillOn = fadeAllLeds(leds, 10);
+	}
 	FastLED.show();
 	return stillOn;
 }
@@ -245,4 +248,22 @@ boolean wave1(Leds* leds, int frame) {
 boolean wave2(Leds* leds, int frame) {
 	wave_int(leds, frame, true);
 }
+
+//--------------------------------------------------------------------------
+
+char tmtop = "***  ***  * *  ***  * *  ***  ***  ***  ***"; 
+char tmmid = " *   * *  * *  *    ***  ***  * *  **   ** ";
+char tmbot = " *   ***  ***  ***  * *  * *  ***  * *  ***";
+
+#define SCOLL_OFFSET 43
+
+boolean scrolltext(Leds* leds, int frame) {
+	static pos = 0;
+
+	if(frame == 0) pos = 0;
+
+}
+
+
+
 
