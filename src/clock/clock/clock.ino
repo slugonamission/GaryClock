@@ -222,7 +222,7 @@ void loop() {
 			Voltmeter::moveMultipleDamped(allMeters, 3, meterPositions);
 			metersToUpdate = 0;
 		}
-		else if (programmer.getLedMode(nextLed)) // Only need to do this if the world isn't stopped, hence there's a chance the user is on the LED page.
+		else if (programmer.getLedMode(&nextLed)) // Only need to do this if the world isn't stopped, hence there's a chance the user is on the LED page.
 		{
 			if (nextLed != leds.getMode()) {
 				leds.setMode(nextLed);
@@ -235,6 +235,3 @@ void loop() {
 		}
 	}
 }
-
-
-
