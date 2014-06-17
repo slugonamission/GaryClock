@@ -152,13 +152,15 @@ void setup() {
 	//delay(1000);
 
 	// Test voltmeters
-	Voltmeter::moveMultipleDamped(allMeters, 3, 255);
-	delay(1000);
-	Voltmeter::moveMultipleDamped(allMeters, 3, 0);
-	delay(1000);
+	/*while(true) {
+		Voltmeter::moveMultipleDamped(allMeters, 3, 255);
+		delay(1000);
+		Voltmeter::moveMultipleDamped(allMeters, 3, 0);
+		delay(1000);
+	}*/
 
 	// Test LEDs
-	//leds.introAnimation();
+	leds.introAnimation();
 
 	/*for(int i = ANIM_SMALL_START; i < ANIM_SMALL_START+ANIM_SMALL_NUM; i++) {
 		test_animation(&leds, i);
@@ -167,8 +169,8 @@ void setup() {
 		delay(1000);
 	}*/
 
-	test_animation(&leds, 13);
-	delay(500);
+	//test_animation(&leds, 13);
+	//delay(500);
 	//test_animation(&leds, 5);
 	//delay(500);	
 

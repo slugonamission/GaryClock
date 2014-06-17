@@ -130,7 +130,47 @@ boolean colour(Leds *leds, int frame) {
 
 //--------------------------------------------------------------------------
 
+#define BATSHITMODES 2
+#define BATSHITMODECHANGE 1000
+
 boolean batshit(Leds *leds, int frame) {
+	static int mode;
+	static int frameToChangeAt;
+
+	if(frame == 0) {
+		mode = 0;
+		frameToChangeAt = 0;
+	}
+
+	if(frame >= frameToChangeAt) {
+		frameToChangeAt = BATSHITMODECHANGE + (random(BATSHITMODECHANGE / 2) - BATSHITMODECHANGE / 4);
+		int currentMode = mode;
+		while(mode == currentMode) mode = random(BATSHITMODES);
+	}
+
+	switch(mode) {
+		case 0:
+			if(frame % 5 == 0) {
+				int hue = random(256);
+				for(int x = 0; x < LED_WIDTH; x++) {
+					if(x % 2 == 0) hue = random(256);
+					for(int y = 0; y < 3; y++) leds->setLed(x, y, CHSV(hue, 255, 255));
+				}
+			}
+			break;
+		case 1:
+			if(frame % 5 == 0) {
+				for(int y = 0; y < 3; y++) {
+					int hue = random(256);
+					for(int x = 0; x < LED_WIDTH; x++) {
+						leds->setLed(x, y, CHSV(hue, 255, 255));
+					}
+				}
+			}
+			break;
+	}
+
+	FastLED.show();
 	return true;
 }
 
