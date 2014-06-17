@@ -17,11 +17,12 @@ void test_animation(Leds *leds, int anim);
 
 //IDs for certain special animations
 
-#define ANIMS_NUM 15
-#define ANIM_SMALL_START 1
+#define ANIMS_NUM 16
+#define ANIM_SMALL_START 2
 #define ANIM_SMALL_NUM 14
 
 #define ANIM_ID_COLOUR 0
+#define ANIM_ID_BATSHIT 1
 #define ANIM_ID_PULSE 4
 
 #endif

@@ -41,7 +41,6 @@ class Leds {
 		void setLed(int x, int y, CRGB rgb);
 		CRGB leds[NUM_LEDS];
 	private:
-		void tickBatshit(void);
 		uint8_t mode;
 };
 

@@ -136,23 +136,17 @@ void Leds::setMode(uint8_t mode)
 		case LEDMODE_COLOUR:
 			set_animation(this, ANIM_ID_COLOUR);
 			break;
+		case LEDMODE_BATSHIT:
+			set_animation(this, ANIM_ID_BATSHIT);
+			break;
 
 		case LEDMODE_SMALL:
 		case LEDMODE_PULSE:
 			//Animations are reissued every minute from clock.ino:rtcTick()
 			break;
-
-		case LEDMODE_BATSHIT:
-			tickBatshit();
-			break;
 	}
 
 	this->mode = mode;
-}
-
-void Leds::tickBatshit()
-{
-	//TODO
 }
 
 

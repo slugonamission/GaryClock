@@ -12,6 +12,7 @@ typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
 boolean colour(Leds *leds, int frame);
+boolean batshit(Leds *leds, int frame);
 boolean twinkle(Leds *leds, int frame);
 boolean huecycle(Leds *leds, int frame);
 boolean quicksweep(Leds *leds, int frame);
@@ -31,20 +32,21 @@ boolean cylon(Leds *leds, int frame);
 //Wastes some memory, but forms a jump table for the interface functions
 animptr animations[ANIMS_NUM] = {
 	colour, //0
-	twinkle, //1
-	huecycle, //2
-	quicksweep, //3
-	singlepulse, //4
-	whitetwinkle, //5
-	wipe, //6
-	wave1, //7
-	wave2, //8
-	slowtwinkle, //9
-	scrolltext, //10
-	blinds_fast, //11
-	blinds_slow, //12
-	colourwipe, //13
-	cylon, //14
+	batshit, //1
+	twinkle, //2
+	huecycle, //3
+	quicksweep, //4
+	singlepulse, //5
+	whitetwinkle, //6
+	wipe, //7
+	wave1, //8
+	wave2, //9
+	slowtwinkle, //10
+	scrolltext, //11
+	blinds_fast, //12
+	blinds_slow, //13
+	colourwipe, //14
+	cylon, //15
 };
 
 
@@ -123,6 +125,12 @@ boolean colour(Leds *leds, int frame) {
 		offset += COLOUR_TIME_STEP;
 	}
 	FastLED.show();
+	return true;
+}
+
+//--------------------------------------------------------------------------
+
+boolean batshit(Leds *leds, int frame) {
 	return true;
 }
 
