@@ -15,10 +15,6 @@
 #define LED_WIDTH 10
 #define LED_HEIGHT 3
 
-#define LEDMODE_COLOUR_COUNTDOWN 5000
-#define LEDMODE_COLOUR_STEP 16
-#define LEDMODE_COLOUR_TIME_STEP 1
-
 static const uint8_t loopPattern[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19};
 
 static const uint8_t logoLeds[] = {3, 4, 5, 6, 13, 14, 15, 16, 23, 24, 25, 26};
@@ -40,21 +36,12 @@ class Leds {
 		void errorAnimation(void);
 		uint8_t getMode(void) { return mode; }
 		void setMode(uint8_t mode);
-		void tick(void);
 		int ledcoord(int x, int y);
 		void setLed(int x, int y, CHSV hsv);
 		void setLed(int x, int y, CRGB rgb);
 		CRGB leds[NUM_LEDS];
-
 	private:
-		void tickSmall(void);
-		void tickColour(void);
-		void tickPulse(void);
 		void tickBatshit(void);
-
-		int currentColourCountdown;
-		int currentColourOffset;
-
 		uint8_t mode;
 };
 

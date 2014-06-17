@@ -1,10 +1,8 @@
 #include "Leds.h"
-
+#include "animations.h"
 
 Leds::Leds() {
 	mode = LEDMODE_OFF;
-	currentColourOffset = 0;
-	currentColourCountdown = LEDMODE_COLOUR_COUNTDOWN;
 }
 
 void Leds::begin(uint8_t mode) {
@@ -131,65 +129,30 @@ void Leds::errorAnimation() {
 
 void Leds::setMode(uint8_t mode)
 {
-	turnAllOff();
-
-	// TODO: Do any state switching required.
-  
-	this->mode = mode;
-}
-
-// Called from loop(). Causes the animation to (optionally) skip to the next stage.
-// This operates in this way (rather than just busy waiting) in order to
-// allow loop() to query the programmer every PROGRAMMER_SKIP_NUM cycles, otherwise
-// the LED routine would effectively block the programmer query.
-void Leds::tick()
-{
-	switch(mode)
-	{
+  	switch(mode) {
 		case LEDMODE_OFF:
+			set_animation(this, -1);
 			return;
-		case LEDMODE_SMALL:
-			tickSmall();
-			break;
 		case LEDMODE_COLOUR:
-			tickColour();
+			set_animation(this, ANIM_ID_COLOUR);
 			break;
+
+		case LEDMODE_SMALL:
 		case LEDMODE_PULSE:
-			tickPulse();
+			//Animations are reissued every minute from clock.ino:rtcTick()
 			break;
+
 		case LEDMODE_BATSHIT:
 			tickBatshit();
 			break;
 	}
-}
 
-void Leds::tickSmall()
-{
-}
-
-void Leds::tickColour()
-{
-	if(currentColourCountdown--)
-		return;
-	currentColourCountdown = LEDMODE_COLOUR_COUNTDOWN;
-
-	for(int i = 0; i < LED_WIDTH; i++)
-	{
-		leds[top[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 255, 120);
-		leds[mid[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 255, 120);
-		leds[bot[i]] = CHSV(currentColourOffset + i*LEDMODE_COLOUR_STEP, 255, 120);
-	}
-	FastLED.show();
-
-	currentColourOffset += LEDMODE_COLOUR_TIME_STEP;
-}
-
-void Leds::tickPulse()
-{
+	this->mode = mode;
 }
 
 void Leds::tickBatshit()
 {
+	//TODO
 }
 
 

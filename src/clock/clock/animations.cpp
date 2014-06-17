@@ -11,7 +11,7 @@ reinitialise the animation.
 typedef boolean (*animptr)(Leds *, int);
 
 //Currently defined animation prototypes
-#define NUM_ANIMS 14
+boolean colour(Leds *leds, int frame);
 boolean twinkle(Leds *leds, int frame);
 boolean huecycle(Leds *leds, int frame);
 boolean quicksweep(Leds *leds, int frame);
@@ -29,21 +29,22 @@ boolean cylon(Leds *leds, int frame);
 
 //Array of pointers to animations
 //Wastes some memory, but forms a jump table for the interface functions
-animptr animations[NUM_ANIMS] = {
-	twinkle, //0
-	huecycle, //1
-	quicksweep, //2
-	singlepulse, //3
-	whitetwinkle, //4
-	wipe, //5
-	wave1, //6
-	wave2, //7
-	slowtwinkle, //8
-	scrolltext, //9
-	blinds_fast, //10
-	blinds_slow, //11
-	colourwipe, //12
-	cylon, //13
+animptr animations[ANIMS_NUM] = {
+	colour, //0
+	twinkle, //1
+	huecycle, //2
+	quicksweep, //3
+	singlepulse, //4
+	whitetwinkle, //5
+	wipe, //6
+	wave1, //7
+	wave2, //8
+	slowtwinkle, //9
+	scrolltext, //10
+	blinds_fast, //11
+	blinds_slow, //12
+	colourwipe, //13
+	cylon, //14
 };
 
 
@@ -54,26 +55,27 @@ int current_frame;
 int current_animation;
 
 boolean animation_tick(Leds *leds) {
-	boolean stillRunning = animations[current_animation](leds, current_frame);
-	current_frame++;
-	return stillRunning;
+	if(current_animation >= 0 && current_animation < ANIMS_NUM) {
+		boolean stillRunning = animations[current_animation](leds, current_frame);
+
+		if(stillRunning) {
+			current_frame++;
+			return true;
+		} else {
+			//The animation reported it was finished, so no sense in running a dead animation any more.
+			current_animation = -1;
+			return false;
+		}
+	}
+	return false;
 }
 
 
 void set_animation(Leds *leds, int num) {
-	if(num < NUM_ANIMS) {
-		current_animation = num;
-	} else {
-		current_animation = 0;
-	}
-	leds->turnAllOff();
+	current_animation = num;
 	current_frame = 0;
+	leds->turnAllOff();
 }
-
-int get_num_animations() {
-	return NUM_ANIMS;
-}
-
 
 void test_animation(Leds *leds, int anim) {
 	leds->turnAllOff();
@@ -100,6 +102,28 @@ int fadeAllLeds(Leds *leds, int speed) {
 		}
 	}
 	return still_on;
+}
+
+//--------------------------------------------------------------------------
+
+#define COLOUR_TIME_STEP 1
+#define COLOUR_COUNTDOWN 2000
+#define COLOUR_STEP 16
+
+boolean colour(Leds *leds, int frame) {
+	static int offset;
+	if(frame == 0) offset = 0;
+
+	if(frame % COLOUR_COUNTDOWN == 0) {
+		for(int i = 0; i < LED_WIDTH; i++) {
+			leds->leds[top[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
+			leds->leds[mid[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
+			leds->leds[bot[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
+		}
+		offset += COLOUR_TIME_STEP;
+	}
+	FastLED.show();
+	return true;
 }
 
 //--------------------------------------------------------------------------

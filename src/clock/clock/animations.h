@@ -9,12 +9,19 @@ boolean animation_tick(Leds *leds);
 
 //Set the current animation to play. num should be less than 
 //that returned by get_num_animations()
+//If -1 (or any other invalid ID) then animations are turned off.
 void set_animation(Leds *leds, int num);
-
-//Get the total number of defined animations
-int get_num_animations();
 
 //Test an animation to completion
 void test_animation(Leds *leds, int anim);
+
+//IDs for certain special animations
+
+#define ANIMS_NUM 15
+#define ANIM_SMALL_START 1
+#define ANIM_SMALL_NUM 14
+
+#define ANIM_ID_COLOUR 0
+#define ANIM_ID_PULSE 4
 
 #endif

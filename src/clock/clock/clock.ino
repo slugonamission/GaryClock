@@ -68,6 +68,18 @@ void rtcTick()
 
 		metersToUpdate++;
 		meterPositions[1] = meterMoffset[curTime[1]];
+
+		//We just ticked the minute, so we may also need to issue a new animation
+		switch(leds.getMode()) {
+			case LEDMODE_SMALL:
+				set_animation(&leds, random(ANIM_SMALL_NUM) + ANIM_SMALL_START);
+				break;
+			case LEDMODE_PULSE:
+				set_animation(&leds, ANIM_ID_PULSE);
+				break;
+			default:
+				break;
+		}
 	}
 
 	metersToUpdate++;
@@ -148,15 +160,17 @@ void setup() {
 	// Test LEDs
 	//leds.introAnimation();
 
-	/*for(int i = 0; i < get_num_animations(); i++) {
+	/*for(int i = ANIM_SMALL_START; i < ANIM_SMALL_START+ANIM_SMALL_NUM; i++) {
 		test_animation(&leds, i);
 		delay(500);
+		test_animation(&leds, i);
+		delay(1000);
 	}*/
 
 	test_animation(&leds, 13);
 	delay(500);
-	test_animation(&leds, 5);
-	delay(500);	
+	//test_animation(&leds, 5);
+	//delay(500);	
 
 	// Get the current time from RTC
 	time_t tz = RTC.get(); 
@@ -184,9 +198,6 @@ void setup() {
 
 
 void loop() {
-	// Is the programmer there?
-	leds.tick();
-
 	// Update Voltmeters here so we can use delays to debounce
 	if (metersToUpdate > 0 && !stopWorld) {
 		Voltmeter::moveMultipleDamped(allMeters, metersToUpdate, meterPositions);
