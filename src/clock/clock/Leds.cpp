@@ -5,13 +5,11 @@ Leds::Leds() {
 	mode = LEDMODE_OFF;
 }
 
-void Leds::begin(uint8_t mode) {
+void Leds::begin() {
 	FastLED.addLeds<WS2812B, LEDS_PIN, GRB>(leds, NUM_LEDS);
 
 	// Turn all LEDs off
 	turnAllOff();
-
-	this->setMode(mode);
 }
 
 void Leds::turnAllOff() {

@@ -30,7 +30,7 @@ static const uint8_t bot[] = {29, 28, 27, 26, 25, 24, 23, 22, 21, 20};
 class Leds {
 	public:
 		Leds(void);
-		void begin(uint8_t mode);
+		void begin(void);
 		void turnAllOff(void);
 		void introAnimation(void);
 		void errorAnimation(void);

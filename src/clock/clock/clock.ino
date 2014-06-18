@@ -112,8 +112,7 @@ void setup() {
 	// TODO: Set up button interrupt
 
 	// Set up LEDs
-	uint8_t ledMode = EEPROM.read(EEPROM_LEDMODE);
-	leds.begin(ledMode);
+	leds.begin();
 
 	// Set up programmer
 	programmer.begin(PROG_ADDR);
@@ -180,6 +179,9 @@ void setup() {
 	TIMSK2 |= (1 << OCIE2A); // enable timer compare interrupt
 	sei(); // Globally enable interrupts
 
+	// Set LED mode from EEPROM
+	uint8_t ledMode = EEPROM.read(EEPROM_LEDMODE);
+	leds.setMode(ledMode);
 
 	/*for(int i = ANIM_SMALL_START; i < ANIM_SMALL_START+ANIM_SMALL_NUM; i++) {
 		test_animation(&leds, i);
