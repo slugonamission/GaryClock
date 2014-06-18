@@ -146,6 +146,7 @@ int flapHeight = 0;
 // Credits page
 void printCreditsHeader();
 void loopCredits();
+uint8_t creditsIdx = 0;
 
 // -----------------------------------------
 // Quiz page
@@ -859,13 +860,35 @@ void loopFlappy()
 // -------------------------------------------------------
 void printCreditsHeader()
 {
-  tft.fillScreen(TEXTBG);
-  drawPBM("neil.pbm", 160, 107, 0, 10);
+  // Done in loop()...
+  //tft.fillScreen(TEXTBG);
+  creditsIdx = 0;
+  //drawPBM("neil.pbm", 160, 107, 0, 10);
 }
 
 void loopCredits()
 {
   char dir = getJoyDir();
+  tft.fillScreen(TEXTBG);
+  switch(creditsIdx++)
+  {
+    case 0:
+      drawPBM("neil.pbm", 160, 107, 0, 10);
+      break;
+    case 1:
+      drawPBM("cat.pbm", 160, 120, 0, 4);
+      break;
+    case 2:
+      drawPBM("gary.pbm", 160, 107, 0, 10);
+      break;
+    case 3:
+      drawPBM("xilinx.pbm", 160, 47, 0, 40);
+      break;
+  }  
+  
+  if(creditsIdx > 1)
+    creditsIdx = 0;
+  
   if(dir == JOY_LEFT)
   {
     curPage = PAGE_MENU;
