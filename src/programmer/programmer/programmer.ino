@@ -160,7 +160,7 @@ int correctAnswer = 0;
 File questionFile;
 bool questionFileOpen = false;
 
-#define QUIZANS_TOP 54
+#define QUIZANS_TOP 70
 
 // -----------------------------------------
 // Undefined page
