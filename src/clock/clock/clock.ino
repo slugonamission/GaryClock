@@ -7,7 +7,6 @@
 #include "animations.h"
 #include <EEPROM.h>
 #include <Wire.h>
-#include "TimerOne.h"
 
 uint8_t curTime[] = {0, 0, 0};
 
