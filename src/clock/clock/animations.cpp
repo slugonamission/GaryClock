@@ -133,7 +133,7 @@ boolean colour(Leds *leds, int frame) {
 //--------------------------------------------------------------------------
 
 #define BATSHITMODES 4
-#define BATSHITMODECHANGE 760
+#define BATSHITMODECHANGE 560
 
 
 boolean batshit(Leds *leds, int frame) {
@@ -159,7 +159,7 @@ boolean batshit(Leds *leds, int frame) {
 
 	switch(bsmode) {
 		case 0:
-			if(frame % 50 == 0) {
+			if(frame % 30 == 0) {
 				int hue = random(256);
 				for(int x = 0; x < LED_WIDTH; x++) {
 					if(x % 2 == 0) hue = random(256);
@@ -168,7 +168,7 @@ boolean batshit(Leds *leds, int frame) {
 			}
 			break;
 		case 1:
-			if(frame % 50 == 0) {
+			if(frame % 30 == 0) {
 				for(int y = 0; y < LED_HEIGHT; y++) {
 					int hue = random(256);
 					for(int x = 0; x < LED_WIDTH; x++) {
@@ -191,7 +191,8 @@ boolean batshit(Leds *leds, int frame) {
 			}
 			break;
 		case 3:
-			if(frame % 20 == 0) {
+			if(frame % 25 == 0) {
+				currenthue = random(255);
 				for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(currenthue, 255, 255);
 			} else {
 				fadeAllLeds(leds, 10);
