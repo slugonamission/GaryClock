@@ -7,6 +7,7 @@
 #include "animations.h"
 #include <EEPROM.h>
 #include <Wire.h>
+#include "TimerOne.h"
 
 uint8_t curTime[] = {0, 0, 0};
 
@@ -86,9 +87,21 @@ void rtcTick()
 	meterPositions[0] = meterSoffset[curTime[2]];
 }
 
+
+//Interrupt handler for the TimerOne timer. Used to tick LED animations.
+void timerone_interrupt() {
+	animation_tick(&leds);
+}
+
+
 void setup() {
 	// Sanity delay
-	delay(1000);
+	delay(500);
+
+	//Attach timer interrupt for animation frames
+	set_animation(&leds, -1);
+	Timer1.initialize(10000); //uS
+	Timer1.attachInterrupt(timerone_interrupt);
 
 	// Set up voltmeters
 	meterH.begin(METER_MID_PIN);
@@ -109,7 +122,8 @@ void setup() {
 
 	// Set up LEDs
 	uint8_t ledMode = EEPROM.read(EEPROM_LEDMODE);
-	leds.begin(ledMode);
+	//leds.begin(ledMode);
+	leds.begin(1);
 
 	// Set up programmer
 	programmer.begin(PROG_ADDR);
@@ -186,10 +200,7 @@ void setup() {
 	meterPositions[2] = meterHoffset[curTime[0]];
 	Voltmeter::moveMultipleDamped(allMeters, 3, meterPositions);
 
-
 	// Set the RTC interrupt callback
-	// THE MODE MAY NOT BE CORRECT. CHECK IT
-	// Actually...it shouldn't matter...
 	pinMode(2, INPUT_PULLUP);
 	attachInterrupt(0, rtcTick, RISING);
 
