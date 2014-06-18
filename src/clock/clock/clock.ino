@@ -96,11 +96,6 @@ void setup() {
 	// Sanity delay
 	delay(500);
 
-	//Attach timer interrupt for animation frames
-	set_animation(&leds, -1);
-	Timer1.initialize(10000); //uS
-	Timer1.attachInterrupt(timerone_interrupt);
-
 	// Set up voltmeters
 	meterH.begin(METER_MID_PIN);
 	meterM.begin(METER_LEFT_PIN);
@@ -172,6 +167,11 @@ void setup() {
 
 	// Test LEDs
 	leds.introAnimation();
+
+	//Attach timer interrupt for animation frames
+	set_animation(&leds, -1);
+	Timer1.initialize(10000); //uS
+	Timer1.attachInterrupt(timerone_interrupt);
 
 	/*for(int i = ANIM_SMALL_START; i < ANIM_SMALL_START+ANIM_SMALL_NUM; i++) {
 		test_animation(&leds, i);

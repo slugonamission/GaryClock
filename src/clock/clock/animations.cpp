@@ -13,6 +13,7 @@ typedef boolean (*animptr)(Leds *, int);
 //Currently defined animation prototypes
 boolean colour(Leds *leds, int frame);
 boolean batshit(Leds *leds, int frame);
+boolean singlepulse_lowpower(Leds *leds, int frame);
 boolean twinkle(Leds *leds, int frame);
 boolean huecycle(Leds *leds, int frame);
 boolean quicksweep(Leds *leds, int frame);
@@ -33,20 +34,21 @@ boolean cylon(Leds *leds, int frame);
 animptr animations[ANIMS_NUM] = {
 	colour, //0
 	batshit, //1
-	twinkle, //2
-	huecycle, //3
-	quicksweep, //4
-	singlepulse, //5
-	whitetwinkle, //6
-	wipe, //7
-	wave1, //8
-	wave2, //9
-	slowtwinkle, //10
-	scrolltext, //11
-	blinds_fast, //12
-	blinds_slow, //13
-	colourwipe, //14
-	cylon, //15
+	singlepulse_lowpower, //2
+	twinkle, //3
+	huecycle, //4
+	quicksweep, //5
+	singlepulse, //6
+	whitetwinkle, //7
+	wipe, //8
+	wave1, //9
+	wave2, //10
+	slowtwinkle, //11
+	scrolltext, //12
+	blinds_fast, //13
+	blinds_slow, //14
+	colourwipe, //15
+	cylon, //16
 };
 
 
@@ -285,7 +287,7 @@ boolean quicksweep(Leds *leds, int frame) {
 
 #define SP_FRAMES 70
 
-boolean singlepulse(Leds *leds, int frame) {
+boolean singlepulse_int(Leds *leds, int frame, boolean lowpower) {
 	static int hue;
 	if(frame == 0) hue = random(256);
 
@@ -293,10 +295,24 @@ boolean singlepulse(Leds *leds, int frame) {
 		? round(((float) (SP_FRAMES/2 - abs((SP_FRAMES / 2) - frame)) / (float) SP_FRAMES) * 255) 
 		: 0;
 
-	for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value);
+	if(lowpower) {
+		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value / 3);
+	} else {
+		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value);
+	}
+
 	FastLED.show();
 	return (frame < SP_FRAMES);
 }
+
+boolean singlepulse(Leds *leds, int frame) {
+	singlepulse_int(leds, frame, false);
+}
+
+boolean singlepulse_lowpower(Leds *leds, int frame) {
+	singlepulse_int(leds, frame, true);
+}
+
 
 //--------------------------------------------------------------------------
 
