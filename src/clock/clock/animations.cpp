@@ -110,21 +110,17 @@ int fadeAllLeds(Leds *leds, int speed) {
 
 //--------------------------------------------------------------------------
 
-#define COLOUR_TIME_STEP 1
-#define COLOUR_COUNTDOWN 2000
-#define COLOUR_STEP 16
-
 boolean colour(Leds *leds, int frame) {
-	static int offset;
+	static uint8_t offset;
 	if(frame == 0) offset = 0;
 
-	if(frame % COLOUR_COUNTDOWN == 0) {
+	if(frame % 4 == 0) {
 		for(int i = 0; i < LED_WIDTH; i++) {
-			leds->leds[top[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
-			leds->leds[mid[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
-			leds->leds[bot[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
+			leds->leds[top[i]] = CHSV(offset + i*8, 255, 120);
+			leds->leds[mid[i]] = CHSV(offset + i*8, 255, 120);
+			leds->leds[bot[i]] = CHSV(offset + i*8, 255, 120);
 		}
-		offset += COLOUR_TIME_STEP;
+		offset++;
 	}
 	FastLED.show();
 	return true;
