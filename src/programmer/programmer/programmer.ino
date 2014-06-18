@@ -4,8 +4,8 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_ST7735.h"
 
-
-//#define SKIP_SHIT
+// REMOVE THIS BEFORE GIVING TO GARY
+#define SKIP_SHIT
 
 // TFT pins
 #define TFT_CS 10
@@ -44,15 +44,16 @@ int sd_card = 0;
 
 // Startup sequence
 char* stringTab[] = {
-  "Initialising ToucHMore",
+  "Initialising runtime",
   "Opening SD...",
   "Finding graphic",
+  "Reticulating splines",
   "Touch More!",
   NULL
 };
 
 #define SDLINE 1
-#define GRAPHICLINE 3
+#define GRAPHICLINE 4
 
 // Menu stuff
 char* menuTab[] = {
@@ -303,9 +304,15 @@ void setup()
   analogWrite(TFT_BACKLIGHT, 255);
   
   tft.initR(INITR_BLACKTAB);
+  #ifndef SKIP_SHIT
   tft.fillScreen(ST7735_MAGENTA);
   tft.fillScreen(ST7735_CYAN);
   tft.fillScreen(ST7735_YELLOW);
+  tft.fillScreen(ST7735_WHITE);
+  tft.fillScreen(ST7735_RED);
+  tft.fillScreen(ST7735_GREEN);
+  tft.fillScreen(ST7735_BLUE);
+  #endif
   tft.fillScreen(TEXTBG);
   tft.setRotation(3);
   
@@ -354,7 +361,13 @@ void setup()
       }
     }
     
-    writeOK();
+    if(curStrIdx != GRAPHICLINE)
+      writeOK();
+    else
+    {
+      tft.setCursor(160 - (6*FONT_WIDTH), curStrIdx*FONT_HEIGHT);
+      writeFail();
+    }
     
     if(curStrIdx == GRAPHICLINE)
     {
@@ -375,6 +388,12 @@ void setup()
   {
     analogWrite(TFT_BACKLIGHT, i);
     delay(6);
+  }
+  
+  for(int i = 1; i < 9; i++)
+  {
+    tft.invertDisplay(i % 2);
+    delay(200);
   }
   
   delay(5000);
