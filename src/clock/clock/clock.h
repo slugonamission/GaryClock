@@ -11,10 +11,10 @@
 #define SEGR_ADDR 0x72
 
 #define BTN_PIN 3
-  
+
 #define METER_LEFT_PIN  9
-#define METER_MID_PIN   10
-#define METER_RIGHT_PIN 11
+#define METER_MID_PIN   5
+#define METER_RIGHT_PIN 10
 
 //#define LEDS_PIN 6 // (actually defined in Leds.h)
 

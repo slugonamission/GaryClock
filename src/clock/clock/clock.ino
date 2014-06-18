@@ -86,8 +86,8 @@ void rtcTick()
 }
 
 
-//Interrupt handler for the TimerOne timer. Used to tick LED animations.
-void timerone_interrupt() {
+//Interrupt handler for timer2. Used to tick LED animations.
+ISR(TIMER2_COMPA_vect) {
 	animation_tick(&leds);
 }
 
@@ -168,10 +168,18 @@ void setup() {
 	// Test LEDs
 	leds.introAnimation();
 
-	//Attach timer interrupt for animation frames
+	// Attach timer2 interrupt for animation frames (100Hz)
 	set_animation(&leds, -1);
-	Timer1.initialize(10000); //uS
-	Timer1.attachInterrupt(timerone_interrupt);
+	cli(); // Globally disable interrupts
+	TCCR2A = 0; // set entire TCCR2A register to 0
+	TCCR2B = 0; // same for TCCR2B
+	TCNT2  = 0; //initialize counter value to 0
+	OCR2A = 155; // set compare match register for 100Hz increments
+	TCCR2A |= (1 << WGM21); // turn on CTC mode
+	TCCR2B |= (1 << CS22) | (1 << CS21) | (1 << CS20); // Set bits for 1024 prescaler
+	TIMSK2 |= (1 << OCIE2A); // enable timer compare interrupt
+	sei(); // Globally enable interrupts
+
 
 	/*for(int i = ANIM_SMALL_START; i < ANIM_SMALL_START+ANIM_SMALL_NUM; i++) {
 		test_animation(&leds, i);
