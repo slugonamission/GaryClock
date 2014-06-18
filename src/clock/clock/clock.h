@@ -12,6 +12,8 @@
 
 #define BTN_PIN 3
 
+#define ARDUINO_LED_PIN 13
+
 #define METER_LEFT_PIN  9
 #define METER_MID_PIN   5
 #define METER_RIGHT_PIN 10

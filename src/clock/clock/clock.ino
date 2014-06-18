@@ -93,7 +93,10 @@ ISR(TIMER2_COMPA_vect) {
 
 void setup() {
 	// Sanity delay
+	pinMode(ARDUINO_LED_PIN, OUTPUT);
+	digitalWrite(ARDUINO_LED_PIN, HIGH);
 	delay(500);
+	digitalWrite(ARDUINO_LED_PIN, LOW);
 
 	// Set up voltmeters
 	meterH.begin(METER_MID_PIN);
@@ -166,6 +169,7 @@ void setup() {
 
 	// Test LEDs
 	leds.introAnimation();
+	//leds.chargeNeutrinos(NULL);
 
 	// Attach timer2 interrupt for animation frames (100Hz)
 	set_animation(&leds, -1);

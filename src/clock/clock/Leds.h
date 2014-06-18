@@ -3,6 +3,7 @@
 
 #include "Arduino.h"
 #include "FastLED.h"
+#include "Voltmeter.h"
 
 #define LEDMODE_OFF 0
 #define LEDMODE_SMALL 1
@@ -34,6 +35,7 @@ class Leds {
 		void turnAllOff(void);
 		void introAnimation(void);
 		void errorAnimation(void);
+		void chargeNeutrinos(Voltmeter meters[]);
 		uint8_t getMode(void) { return mode; }
 		void setMode(uint8_t mode);
 		int ledcoord(int x, int y);
@@ -41,6 +43,7 @@ class Leds {
 		void setLed(int x, int y, CRGB rgb);
 		CRGB leds[NUM_LEDS];
 	private:
+		void showLeds(void);
 		uint8_t mode;
 };
 
