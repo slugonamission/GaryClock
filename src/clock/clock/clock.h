@@ -21,4 +21,9 @@
 #define EEPROM_LEDMODE 0
 
 
+#define HOUR 2
+#define MINS 1
+#define SECS 0
+
+
 #endif
