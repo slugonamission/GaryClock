@@ -876,7 +876,7 @@ void loopCredits()
       drawPBM("neil.pbm", 160, 107, 0, 10);
       break;
     case 1:
-      drawPBM("cat.pbm", 160, 120, 0, 4);
+      drawPBM("cat.pbm", 160, 107, 0, 10);
       break;
     case 2:
       drawPBM("gary.pbm", 160, 107, 0, 10);
@@ -886,7 +886,7 @@ void loopCredits()
       break;
   }  
   
-  if(creditsIdx > 1)
+  if(creditsIdx > 3)
     creditsIdx = 0;
   
   if(dir == JOY_LEFT)
