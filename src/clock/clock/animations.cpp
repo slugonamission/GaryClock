@@ -130,12 +130,15 @@ boolean colour(Leds *leds, int frame) {
 
 //--------------------------------------------------------------------------
 
-#define BATSHITMODES 2
+#define BATSHITMODES 4
 #define BATSHITMODECHANGE 1000
+
 
 boolean batshit(Leds *leds, int frame) {
 	static int mode;
 	static int frameToChangeAt;
+	static int mode2progress;
+	static int currenthue;
 
 	if(frame == 0) {
 		mode = 0;
@@ -145,12 +148,16 @@ boolean batshit(Leds *leds, int frame) {
 	if(frame >= frameToChangeAt) {
 		frameToChangeAt = BATSHITMODECHANGE + (random(BATSHITMODECHANGE / 2) - BATSHITMODECHANGE / 4);
 		int currentMode = mode;
-		while(mode == currentMode) mode = random(BATSHITMODES);
+		while(mode == currentMode) {
+			mode = random(BATSHITMODES);
+			mode2progress = -3;
+			currenthue = random(255);
+		}
 	}
 
 	switch(mode) {
 		case 0:
-			if(frame % 5 == 0) {
+			if(frame % 50 == 0) {
 				int hue = random(256);
 				for(int x = 0; x < LED_WIDTH; x++) {
 					if(x % 2 == 0) hue = random(256);
@@ -159,13 +166,33 @@ boolean batshit(Leds *leds, int frame) {
 			}
 			break;
 		case 1:
-			if(frame % 5 == 0) {
-				for(int y = 0; y < 3; y++) {
+			if(frame % 50 == 0) {
+				for(int y = 0; y < LED_HEIGHT; y++) {
 					int hue = random(256);
 					for(int x = 0; x < LED_WIDTH; x++) {
 						leds->setLed(x, y, CHSV(hue, 255, 255));
 					}
 				}
+			}
+			break;
+		case 2:
+			if(mode2progress <= LED_WIDTH) {
+				if(frame % 2 == 0) mode2progress++;
+				for(int x = -1; x < mode2progress; x++) {
+					leds->setLed(x+1, 0, CHSV(currenthue, 255, 255));
+					leds->setLed(x, 1, CHSV(currenthue, 255, 255));
+					leds->setLed(x-1, 2, CHSV(currenthue, 255, 255));
+				}
+			} else{
+				mode2progress = -3;
+				currenthue = random(255);
+			}
+			break;
+		case 3:
+			if(frame % 20 == 0) {
+				for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(currenthue, 255, 255);
+			} else {
+				fadeAllLeds(leds, 10);
 			}
 			break;
 	}

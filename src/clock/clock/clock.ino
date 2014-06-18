@@ -24,7 +24,7 @@ Voltmeter meterH = Voltmeter();
 Voltmeter meterM = Voltmeter();
 Voltmeter meterS = Voltmeter();
 Voltmeter allMeters[3];
-int metersToUpdate = 0;
+volatile int metersToUpdate = 0;
 int meterPositions[3];
 
 Leds leds = Leds();
@@ -71,16 +71,14 @@ void rtcTick()
 		meterPositions[1] = meterMoffset[curTime[1]];
 
 		//We just ticked the minute, so we may also need to issue a new animation
-		switch(leds.getMode()) {
-			case LEDMODE_SMALL:
-				set_animation(&leds, random(ANIM_SMALL_NUM) + ANIM_SMALL_START);
-				break;
-			case LEDMODE_PULSE:
-				set_animation(&leds, ANIM_ID_PULSE);
-				break;
-			default:
-				break;
+		if(leds.getMode() == LEDMODE_SMALL) {
+			set_animation(&leds, random(ANIM_SMALL_NUM) + ANIM_SMALL_START);
 		}
+	}
+
+	//We just ticked the second, so we may also need to issue a new animation
+	if(leds.getMode() == LEDMODE_PULSE) {
+		set_animation(&leds, ANIM_ID_PULSE);
 	}
 
 	metersToUpdate++;
@@ -122,8 +120,7 @@ void setup() {
 
 	// Set up LEDs
 	uint8_t ledMode = EEPROM.read(EEPROM_LEDMODE);
-	//leds.begin(ledMode);
-	leds.begin(1);
+	leds.begin(ledMode);
 
 	// Set up programmer
 	programmer.begin(PROG_ADDR);

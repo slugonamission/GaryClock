@@ -129,6 +129,8 @@ void Leds::errorAnimation() {
 
 void Leds::setMode(uint8_t mode)
 {
+	turnAllOff();
+
   	switch(mode) {
 		case LEDMODE_OFF:
 			set_animation(this, -1);
@@ -142,6 +144,7 @@ void Leds::setMode(uint8_t mode)
 
 		case LEDMODE_SMALL:
 		case LEDMODE_PULSE:
+			set_animation(this, -1);
 			//Animations are reissued every minute from clock.ino:rtcTick()
 			break;
 	}
