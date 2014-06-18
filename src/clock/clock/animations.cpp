@@ -53,8 +53,8 @@ animptr animations[ANIMS_NUM] = {
 //--------------------------------------------------------------------------
 // Interface functions
 
-int current_frame;
-int current_animation;
+int current_frame = 0; 
+int current_animation = -1;
 
 boolean animation_tick(Leds *leds) {
 	if(current_animation >= 0 && current_animation < ANIMS_NUM) {
