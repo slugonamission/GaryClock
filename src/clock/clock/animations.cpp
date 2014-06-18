@@ -133,31 +133,31 @@ boolean colour(Leds *leds, int frame) {
 //--------------------------------------------------------------------------
 
 #define BATSHITMODES 4
-#define BATSHITMODECHANGE 1000
+#define BATSHITMODECHANGE 760
 
 
 boolean batshit(Leds *leds, int frame) {
-	static int mode;
+	static int bsmode;
 	static int frameToChangeAt;
 	static int mode2progress;
 	static int currenthue;
 
 	if(frame == 0) {
-		mode = 0;
+		bsmode = random(BATSHITMODES);
 		frameToChangeAt = 0;
 	}
 
 	if(frame >= frameToChangeAt) {
-		frameToChangeAt = BATSHITMODECHANGE + (random(BATSHITMODECHANGE / 2) - BATSHITMODECHANGE / 4);
-		int currentMode = mode;
-		while(mode == currentMode) {
-			mode = random(BATSHITMODES);
+		frameToChangeAt = BATSHITMODECHANGE + random(BATSHITMODECHANGE / 4);
+		int currentMode = bsmode;
+		while(bsmode == currentMode) {
+			bsmode = random(BATSHITMODES);
 			mode2progress = -3;
 			currenthue = random(255);
 		}
 	}
 
-	switch(mode) {
+	switch(bsmode) {
 		case 0:
 			if(frame % 50 == 0) {
 				int hue = random(256);
@@ -296,7 +296,7 @@ boolean singlepulse_int(Leds *leds, int frame, boolean lowpower) {
 		: 0;
 
 	if(lowpower) {
-		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value / 3);
+		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, round((float)value / 1.5));
 	} else {
 		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value);
 	}
