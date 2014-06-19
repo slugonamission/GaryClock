@@ -648,7 +648,7 @@ void loopTime()
   
   if(dir == JOY_UP && timeSelectedSegment <= TIMESEG_SEC)
   {
-    if(timeSelectedSegment == TIMESEG_HOUR && timeCurrent[timeSelectedSegment] == 11)
+    if(timeSelectedSegment == TIMESEG_HOUR && timeCurrent[timeSelectedSegment] == 23)
       timeCurrent[timeSelectedSegment] = 0;
     else if(timeCurrent[timeSelectedSegment] == 59)
       timeCurrent[timeSelectedSegment] = 0;
@@ -663,7 +663,7 @@ void loopTime()
     if(timeCurrent[timeSelectedSegment] == 0)
     {
       if(timeSelectedSegment == TIMESEG_HOUR)
-        timeCurrent[timeSelectedSegment] = 11;
+        timeCurrent[timeSelectedSegment] = 23;
       else
         timeCurrent[timeSelectedSegment] = 59;
     }

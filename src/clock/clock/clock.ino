@@ -39,6 +39,20 @@ bool stopWorld = 0;
 #define PROGRAMMER_SKIP_NUM 1
 volatile int programmerLoopSkip = 1;
 
+uint8_t make12Hour(uint8_t hour24)
+{
+  if(hour24 == 0)
+    return 12;
+  if(hour24 > 12)
+    return hour24 - 12;
+  return hour24;
+}
+
+uint8_t makeMeterTime(uint8_t hour24)
+{
+  return make12Hour(hour24) - 1;
+}
+
 void rtcTick()
 {
 	programmerLoopSkip--;
@@ -58,13 +72,13 @@ void rtcTick()
 			curTime[1] = 0;
 			curTime[0]++;
 
-			if(curTime[0] == 12)
+			if(curTime[0] == 23)
 			{
 				curTime[0] = 0;
 			}
 
 			metersToUpdate++;
-			meterPositions[2] = meterHoffset[curTime[0]];
+			meterPositions[2] = meterHoffset[makeMeterTime(curTime[0])];
 		}
 
 		metersToUpdate++;
@@ -187,14 +201,14 @@ void setup() {
 
 	// Get the current time from RTC
 	time_t tz = RTC.get(); 
-	curTime[0] = hour(tz) % 12;
+	curTime[0] = hour(tz);
 	curTime[1] = minute(tz);
 	curTime[2] = second(tz);
 
 	// Set the voltmeters
 	meterPositions[0] = meterSoffset[curTime[2]];
 	meterPositions[1] = meterMoffset[curTime[1]];
-	meterPositions[2] = meterHoffset[curTime[0]];
+	meterPositions[2] = meterHoffset[makeMeterTime(curTime[0])];
 	Voltmeter::moveMultipleDamped(allMeters, 3, meterPositions);
 
 	// Set the RTC interrupt callback
@@ -243,7 +257,7 @@ void loop() {
 
 			meterPositions[0] = meterSoffset[curTime[2]];
 			meterPositions[1] = meterMoffset[curTime[1]];
-			meterPositions[2] = meterHoffset[curTime[0]];
+			meterPositions[2] = meterHoffset[makeMeterTime(curTime[0])];
 			Voltmeter::moveMultipleDamped(allMeters, 3, meterPositions);
 			metersToUpdate = 0;
 		}
