@@ -76,13 +76,13 @@ void rtcTick()
 		{
 			curTime[MINS] = 0;
 			curTime[HOUR]++;
-                        
-                        if(curTime[HOUR] == 23)
-                          curTime[HOUR] = 0;
-                          
-                        metersToUpdate++;
-                        
-                        meterPositions[HOUR] = meterHoffset[makeMeterTime(curTime[HOUR])];
+
+			if(curTime[HOUR] == 23)
+				curTime[HOUR] = 0;
+
+			metersToUpdate++;
+
+			meterPositions[HOUR] = meterHoffset[makeMeterTime(curTime[HOUR])];
 		}
 
 		metersToUpdate++;
@@ -90,13 +90,16 @@ void rtcTick()
 
 		//We just ticked the minute, so we may also need to issue a new animation
 		if(leds.getMode() == LEDMODE_SMALL) {
-			set_animation(&leds, random(ANIM_SMALL_NUM) + ANIM_SMALL_START);
+			set_animation(&leds, random(ANIM_SMALL_NUM) + ANIM_SMALL_START, 19);
 		}
 	}
 
 	//We just ticked the second, so we may also need to issue a new animation
 	if(leds.getMode() == LEDMODE_PULSE) {
-		set_animation(&leds, ANIM_ID_PULSE);
+		if (metersToUpdate == 0)
+			set_animation(&leds, ANIM_ID_PULSE, 10);
+		else
+			set_animation(&leds, ANIM_ID_PULSE, 19);
 	}
 
 	metersToUpdate++;
@@ -164,7 +167,8 @@ void setup() {
 
 	// Test LEDs
 	leds.introAnimation();
-	//leds.chargeNeutrinos(NULL);
+	//Voltmeter allMeters[] = {meterM, meterS, meterH};
+	//leds.chargeNeutrinos(allMeters);
 
 	// Attach timer2 interrupt for animation frames (100Hz)
 	set_animation(&leds, -1);

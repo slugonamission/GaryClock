@@ -59,7 +59,7 @@ int current_frame = 0;
 int current_animation = -1;
 
 boolean animation_tick(Leds *leds) {
-	if(current_animation >= 0 && current_animation < ANIMS_NUM) {
+	if(current_animation >= 0 && current_animation < ANIMS_NUM && current_frame >= 0) {
 		boolean stillRunning = animations[current_animation](leds, current_frame);
 
 		if(stillRunning) {
@@ -71,13 +71,16 @@ boolean animation_tick(Leds *leds) {
 			return false;
 		}
 	}
+	else if (current_frame < 0) {
+		current_frame++;
+	}
 	return false;
 }
 
 
-void set_animation(Leds *leds, int num) {
+void set_animation(Leds *leds, int num, int delay) {
 	current_animation = num;
-	current_frame = 0;
+	current_frame = -delay;
 	leds->turnAllOff();
 }
 

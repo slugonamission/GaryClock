@@ -10,7 +10,7 @@ boolean animation_tick(Leds *leds);
 //Set the current animation to play. num should be less than 
 //that returned by get_num_animations()
 //If -1 (or any other invalid ID) then animations are turned off.
-void set_animation(Leds *leds, int num);
+void set_animation(Leds *leds, int num, int delay = 0);
 
 //Test an animation to completion
 void test_animation(Leds *leds, int anim);
