@@ -126,7 +126,27 @@ void Leds::errorAnimation() {
 
 
 void Leds::chargeNeutrinos(Voltmeter meters[]) {
+	randomSeed(micros());
+	uint8_t led;
+	uint8_t meterVals[3];
+
 	FastLED.setBrightness(255);
+	for (int led = 0; led < NUM_LEDS; led++)
+		leds[led] = CRGB::Black;
+
+	meterVals[0] = 0;
+	meterVals[1] = 255;
+	meterVals[2] = 128;
+	meters[2].move(meterVals[2]);
+	Voltmeter::moveMultipleDamped(meters, 2, meterVals);
+
+	delay(2000);
+
+	meterVals[0] = 255;
+	meterVals[1] = 0;
+	meterVals[2] = 128;
+	meters[2].move(meterVals[2]);
+	Voltmeter::moveMultipleDamped(meters, 2, meterVals);
 
 	for (int led = 0; led < NUM_LEDS; led++)
 		leds[led] = CRGB::White;
@@ -138,8 +158,17 @@ void Leds::chargeNeutrinos(Voltmeter meters[]) {
 		delay(80);
 	}
 
-	randomSeed(micros());
-	int led;
+	meterVals[0] = 0;
+	meterVals[1] = 0;
+	meterVals[2] = 128;
+	meters[2].move(0);
+	delay(200);
+	meters[0].moveDamped((uint8_t)0);
+	meters[2].move(255);
+	delay(200);
+	meters[1].moveDamped(255);
+	meters[2].move(128);
+	delay(500);
 
 	for (int led = 0; led < NUM_LEDS; led++)
 		leds[led] = CRGB::Black;
@@ -148,11 +177,13 @@ void Leds::chargeNeutrinos(Voltmeter meters[]) {
 	for (int i = 0; i < 5; i++) {
 		delay(1000);
 		led = random(NUM_LEDS);
+		meters[2].move(meterPos[led]);
 		leds[led].setHue(random(256));
 		showLeds();
 		delay(100);
 		leds[led] = CRGB::Black;
 		showLeds();
+		meters[2].move(128);
 	}
 
 	for (int led = 0; led < NUM_LEDS; led++)
@@ -162,11 +193,13 @@ void Leds::chargeNeutrinos(Voltmeter meters[]) {
 	for (int i = 0; i < 5; i++) {
 		delay(500);
 		led = random(NUM_LEDS);
+		meters[2].move(meterPos[led]);
 		leds[led].setHue(random(256));
 		showLeds();
 		delay(50);
 		leds[led] = CRGB::Black;
 		showLeds();
+		meters[2].move(128);
 	}
 
 	for (int led = 0; led < NUM_LEDS; led++)
@@ -176,11 +209,13 @@ void Leds::chargeNeutrinos(Voltmeter meters[]) {
 	for (int i = 0; i < 5; i++) {
 		delay(300);
 		led = random(NUM_LEDS);
+		meters[2].move(meterPos[led]);
 		leds[led].setHue(random(256));
 		showLeds();
 		delay(20);
 		leds[led] = CRGB::Black;
 		showLeds();
+		meters[2].move(128);
 	}
 
 	for (int led = 0; led < NUM_LEDS; led++)
@@ -190,11 +225,13 @@ void Leds::chargeNeutrinos(Voltmeter meters[]) {
 	for (int i = 0; i < 100; i++) {
 		delay(304 - i*3);
 		led = random(NUM_LEDS);
+		meters[2].move(meterPos[led]);
 		leds[led].setHue(random(256));
 		showLeds();
 		delay(5);
 		leds[led] = CRGB::Black;
 		showLeds();
+		meters[2].move(128);
 	}
 
 	for (int led = 0; led < NUM_LEDS; led++)
@@ -204,31 +241,68 @@ void Leds::chargeNeutrinos(Voltmeter meters[]) {
 	for (int i = 0; i < 1000; i++) {
 		delay(2);
 		led = random(NUM_LEDS);
+		meters[2].move(meterPos[led]);
 		leds[led].setHue(random(256));
 		showLeds();
 		delay(2);
 		leds[led] = CRGB::Black;
 		showLeds();
+		meters[2].move(128);
 	}
 
-	for (int i = 0; i < 400; i++) {
-		delay(42-i/10);
-		leds[random(NUM_LEDS)].setHue(random(256));
-		showLeds();
+	meterVals[0] = 0;
+	meterVals[1] = 0;
+	meterVals[2] = 0;
+	meters[2].move(0);
+	Voltmeter::moveMultipleDamped(meters, 2, (uint8_t)0);
+
+	for (int i = 0; i < 20; i++) {
+		meterVals[0]++;
+		meterVals[1]++;
+		meterVals[2]++;
+		meters[0].move(meterVals[0]);
+		meters[1].move(meterVals[1]);
+		meters[2].move(meterVals[2]);
+		
+		for (int j = 0; j < 21; j++) {
+			delay(42-(((i*j)+j)/10));
+			leds[random(NUM_LEDS)].setHue(random(256));
+			showLeds();
+		}
 	}
 
-	for (int i = 0; i < 4000; i++) {
-		delay(2);
-		leds[random(NUM_LEDS)].setHue(random(256));
-		showLeds();
+	for (int i = 0; i < 235; i++) {
+		meterVals[0]++;
+		meterVals[1]++;
+		meterVals[2]++;
+		meters[0].move(meterVals[0]);
+		meters[1].move(meterVals[1]);
+		meters[2].move(meterVals[2]);
+		
+		for (int j = 0; j < 17; j++) {
+			delay(2);
+			leds[random(NUM_LEDS)].setHue(random(256));
+			showLeds();
+		}
 	}
 
-	for (int i = 0; i < 30; i++) {
+	delay(800);
+
+	for (int i = 0; i < 25; i++) {
+		meterVals[0] -= 10;
+		meterVals[1] -= 10;
+		meterVals[2] -= 10;
+		meters[0].move(meterVals[0]);
+		meters[1].move(meterVals[1]);
+		meters[2].move(meterVals[2]);
 		showLeds();
 		delay(20);
 		FastLED.showColor(CRGB::Black);
 		delay(80);
 	}
+
+	meters[2].move(0);
+	Voltmeter::moveMultipleDamped(meters, 2, (uint8_t)0);
 
 	delay(6000);
 }
