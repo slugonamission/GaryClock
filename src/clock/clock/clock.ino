@@ -7,7 +7,6 @@
 #include "animations.h"
 #include <EEPROM.h>
 #include <Wire.h>
-#include "TimerOne.h"
 
 uint8_t curTime[] = {0, 0, 0};
 
@@ -23,7 +22,7 @@ uint8_t meterSoffset[60];
 Voltmeter meterH = Voltmeter();
 Voltmeter meterM = Voltmeter();
 Voltmeter meterS = Voltmeter();
-Voltmeter allMeters[3];
+Voltmeter shitMeters[2];
 volatile int metersToUpdate = 0;
 int meterPositions[3];
 
@@ -38,6 +37,12 @@ bool stopWorld = 0;
 // transactions. This then allows loop() to drive the LED patterns and still query the programmer.
 #define PROGRAMMER_SKIP_NUM 1
 volatile int programmerLoopSkip = 1;
+
+// Forward prototypes
+uint8_t make12Hour(uint8_t hour24);
+uint8_t makeMeterTime(uint8_t hour24);
+void rtcTick();
+
 
 uint8_t make12Hour(uint8_t hour24)
 {
@@ -61,28 +66,27 @@ void rtcTick()
 	// DO NOT ISSUE AN I2C TRANSACTION IN THIS ISR.
 	// WE ISSUE THESE IN loop(). RACE CONDITIONS CAN ARISE.
 	// Also, remember that DELAYS DO NOT WORK in ISRs.
-	curTime[2]++;
-	if(curTime[2] == 60)
+	curTime[SECS]++;
+	if(curTime[SECS] == 60)
 	{
-		curTime[2] = 0;
-		curTime[1]++;
+		curTime[SECS] = 0;
+		curTime[MINS]++;
 
-		if(curTime[1] == 60)
+		if(curTime[MINS] == 60)
 		{
-			curTime[1] = 0;
-			curTime[0]++;
-
-			if(curTime[0] == 23)
-			{
-				curTime[0] = 0;
-			}
-
-			metersToUpdate++;
-			meterPositions[2] = meterHoffset[makeMeterTime(curTime[0])];
+			curTime[MINS] = 0;
+			curTime[HOUR]++;
+                        
+                        if(curTime[HOUR] == 23)
+                          curTime[HOUR] = 0;
+                          
+                        metersToUpdate++;
+                        
+                        meterPositions[HOUR] = meterHoffset[makeMeterTime(curTime[HOUR])];
 		}
 
 		metersToUpdate++;
-		meterPositions[1] = meterMoffset[curTime[1]];
+		meterPositions[MINS] = meterMoffset[curTime[MINS]];
 
 		//We just ticked the minute, so we may also need to issue a new animation
 		if(leds.getMode() == LEDMODE_SMALL) {
@@ -96,27 +100,29 @@ void rtcTick()
 	}
 
 	metersToUpdate++;
-	meterPositions[0] = meterSoffset[curTime[2]];
+	meterPositions[SECS] = meterSoffset[curTime[SECS]];
 }
 
 
-//Interrupt handler for the TimerOne timer. Used to tick LED animations.
-void timerone_interrupt() {
+//Interrupt handler for timer2. Used to tick LED animations.
+ISR(TIMER2_COMPA_vect) {
 	animation_tick(&leds);
 }
 
 
 void setup() {
 	// Sanity delay
+	pinMode(ARDUINO_LED_PIN, OUTPUT);
+	digitalWrite(ARDUINO_LED_PIN, HIGH);
 	delay(500);
+	digitalWrite(ARDUINO_LED_PIN, LOW);
 
 	// Set up voltmeters
 	meterH.begin(METER_MID_PIN);
 	meterM.begin(METER_LEFT_PIN);
 	meterS.begin(METER_RIGHT_PIN);
-	allMeters[0] = meterS;
-	allMeters[1] = meterM;
-	allMeters[2] = meterH;
+	shitMeters[SECS] = meterS;
+	shitMeters[MINS] = meterM;
 
 	// Set up displays
 	//segL.begin(SEGL_ADDR);
@@ -128,8 +134,7 @@ void setup() {
 	// TODO: Set up button interrupt
 
 	// Set up LEDs
-	uint8_t ledMode = EEPROM.read(EEPROM_LEDMODE);
-	leds.begin(ledMode);
+	leds.begin();
 
 	// Set up programmer
 	programmer.begin(PROG_ADDR);
@@ -173,19 +178,33 @@ void setup() {
 
 	// Test voltmeters
 	/*while(true) {
-		Voltmeter::moveMultipleDamped(allMeters, 3, 255);
+		meterH.move(255);
+		Voltmeter::moveMultipleDamped(shitMeters, 2, 255);
 		delay(1000);
-		Voltmeter::moveMultipleDamped(allMeters, 3, 0);
+		meterH.move(0);
+		Voltmeter::moveMultipleDamped(shitMeters, 2, 0);
 		delay(1000);
 	}*/
 
 	// Test LEDs
 	leds.introAnimation();
+	//leds.chargeNeutrinos(NULL);
 
-	//Attach timer interrupt for animation frames
+	// Attach timer2 interrupt for animation frames (100Hz)
 	set_animation(&leds, -1);
-	Timer1.initialize(10000); //uS
-	Timer1.attachInterrupt(timerone_interrupt);
+	cli(); // Globally disable interrupts
+	TCCR2A = 0; // set entire TCCR2A register to 0
+	TCCR2B = 0; // same for TCCR2B
+	TCNT2  = 0; //initialize counter value to 0
+	OCR2A = 155; // set compare match register for 100Hz increments
+	TCCR2A |= (1 << WGM21); // turn on CTC mode
+	TCCR2B |= (1 << CS22) | (1 << CS21) | (1 << CS20); // Set bits for 1024 prescaler
+	TIMSK2 |= (1 << OCIE2A); // enable timer compare interrupt
+	sei(); // Globally enable interrupts
+
+	// Set LED mode from EEPROM
+	uint8_t ledMode = EEPROM.read(EEPROM_LEDMODE);
+	leds.setMode(ledMode);
 
 	/*for(int i = ANIM_SMALL_START; i < ANIM_SMALL_START+ANIM_SMALL_NUM; i++) {
 		test_animation(&leds, i);
@@ -201,15 +220,16 @@ void setup() {
 
 	// Get the current time from RTC
 	time_t tz = RTC.get(); 
-	curTime[0] = hour(tz);
-	curTime[1] = minute(tz);
-	curTime[2] = second(tz);
+	curTime[HOUR] = hour(tz);
+	curTime[MINS] = minute(tz);
+	curTime[SECS] = second(tz);
 
 	// Set the voltmeters
-	meterPositions[0] = meterSoffset[curTime[2]];
-	meterPositions[1] = meterMoffset[curTime[1]];
-	meterPositions[2] = meterHoffset[makeMeterTime(curTime[0])];
-	Voltmeter::moveMultipleDamped(allMeters, 3, meterPositions);
+	meterPositions[SECS] = meterSoffset[curTime[SECS]];
+	meterPositions[MINS] = meterMoffset[curTime[MINS]];
+	meterPositions[HOUR] = meterHoffset[makeMeterTime(curTime[HOUR])];
+	meterH.move(meterPositions[HOUR]);
+	Voltmeter::moveMultipleDamped(shitMeters, 2, meterPositions);
 
 	// Set the RTC interrupt callback
 	pinMode(2, INPUT_PULLUP);
@@ -224,7 +244,11 @@ void setup() {
 void loop() {
 	// Update Voltmeters here so we can use delays to debounce
 	if (metersToUpdate > 0 && !stopWorld) {
-		Voltmeter::moveMultipleDamped(allMeters, metersToUpdate, meterPositions);
+		if (metersToUpdate == 3) {
+			meterH.move(meterPositions[HOUR]);
+			metersToUpdate = 2;
+		}
+		Voltmeter::moveMultipleDamped(shitMeters, metersToUpdate, meterPositions);
 		metersToUpdate = 0;
 	}
 
@@ -238,7 +262,7 @@ void loop() {
 	if (!gotProgrammer && programmer.exists())
 	{
 		programmer.setLedMode(leds.getMode());
-		programmer.setTime(curTime[0], curTime[1], curTime[2]);
+		programmer.setTime(curTime[HOUR], curTime[MINS], curTime[SECS]);
 		//delay(1000);
 		gotProgrammer = true;
 	}
@@ -246,19 +270,20 @@ void loop() {
 	{
 		uint8_t nextLed = 0;
 
-		if (stopWorld && programmer.getTime(&curTime[0], &curTime[1], &curTime[2]))
+		if (stopWorld && programmer.getTime(&curTime[HOUR], &curTime[MINS], &curTime[SECS]))
 		{
 			tmElements_t tz;
 			RTC.read(tz);
-			tz.Hour = curTime[0];
-			tz.Minute = curTime[1];
-			tz.Second = curTime[2];
+			tz.Hour = curTime[HOUR];
+			tz.Minute = curTime[MINS];
+			tz.Second = curTime[SECS];
 			RTC.write(tz);
 
-			meterPositions[0] = meterSoffset[curTime[2]];
-			meterPositions[1] = meterMoffset[curTime[1]];
-			meterPositions[2] = meterHoffset[makeMeterTime(curTime[0])];
-			Voltmeter::moveMultipleDamped(allMeters, 3, meterPositions);
+			meterPositions[SECS] = meterSoffset[curTime[SECS]];
+			meterPositions[MINS] = meterMoffset[curTime[MINS]];
+			meterPositions[HOUR] = meterHoffset[makeMeterTime(curTime[HOUR])];
+			meterH.move(meterPositions[HOUR]);
+			Voltmeter::moveMultipleDamped(shitMeters, 2, meterPositions);
 			metersToUpdate = 0;
 		}
 		else if (programmer.getLedMode(&nextLed)) // Only need to do this if the world isn't stopped, hence there's a chance the user is on the LED page.

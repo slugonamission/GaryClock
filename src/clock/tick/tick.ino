@@ -2,9 +2,9 @@
  * Testing damping on the Voltmeter - stops some of the intertia from the heavy needle
  **/
 
-#define SECS_PIN  11
-#define MINS_PIN  10
-#define HOURS_PIN 9
+#define SECS_PIN  10
+#define MINS_PIN  9
+#define HOURS_PIN 5
 int allHands[] = {SECS_PIN, MINS_PIN, HOURS_PIN};
 
 #define TICK_TIME 4000

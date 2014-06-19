@@ -5,13 +5,11 @@ Leds::Leds() {
 	mode = LEDMODE_OFF;
 }
 
-void Leds::begin(uint8_t mode) {
+void Leds::begin() {
 	FastLED.addLeds<WS2812B, LEDS_PIN, GRB>(leds, NUM_LEDS);
 
 	// Turn all LEDs off
 	turnAllOff();
-
-	this->setMode(mode);
 }
 
 void Leds::turnAllOff() {
@@ -122,6 +120,147 @@ void Leds::errorAnimation() {
 	// Turn all red (will do for now)
 	for (int led = 0; led < 30; led++) 
 		leds[led] = CRGB(100, 0, 0);
+
+	FastLED.show();
+}
+
+
+void Leds::chargeNeutrinos(Voltmeter meters[]) {
+	FastLED.setBrightness(255);
+
+	for (int led = 0; led < NUM_LEDS; led++)
+		leds[led] = CRGB::White;
+
+	for (int i = 0; i < 20; i++) {
+		showLeds();
+		delay(20);
+		FastLED.showColor(CRGB::Black);
+		delay(80);
+	}
+
+	randomSeed(micros());
+	int led;
+
+	for (int led = 0; led < NUM_LEDS; led++)
+		leds[led] = CRGB::Black;
+
+	showLeds();
+	for (int i = 0; i < 5; i++) {
+		delay(1000);
+		led = random(NUM_LEDS);
+		leds[led].setHue(random(256));
+		showLeds();
+		delay(100);
+		leds[led] = CRGB::Black;
+		showLeds();
+	}
+
+	for (int led = 0; led < NUM_LEDS; led++)
+		leds[led] = CRGB::Black;
+
+	showLeds();
+	for (int i = 0; i < 5; i++) {
+		delay(500);
+		led = random(NUM_LEDS);
+		leds[led].setHue(random(256));
+		showLeds();
+		delay(50);
+		leds[led] = CRGB::Black;
+		showLeds();
+	}
+
+	for (int led = 0; led < NUM_LEDS; led++)
+		leds[led] = CRGB::Black;
+
+	showLeds();
+	for (int i = 0; i < 5; i++) {
+		delay(300);
+		led = random(NUM_LEDS);
+		leds[led].setHue(random(256));
+		showLeds();
+		delay(20);
+		leds[led] = CRGB::Black;
+		showLeds();
+	}
+
+	for (int led = 0; led < NUM_LEDS; led++)
+		leds[led] = CRGB::Black;
+
+	showLeds();
+	for (int i = 0; i < 100; i++) {
+		delay(304 - i*3);
+		led = random(NUM_LEDS);
+		leds[led].setHue(random(256));
+		showLeds();
+		delay(5);
+		leds[led] = CRGB::Black;
+		showLeds();
+	}
+
+	for (int led = 0; led < NUM_LEDS; led++)
+		leds[led] = CRGB::Black;
+
+	showLeds();
+	for (int i = 0; i < 1000; i++) {
+		delay(2);
+		led = random(NUM_LEDS);
+		leds[led].setHue(random(256));
+		showLeds();
+		delay(2);
+		leds[led] = CRGB::Black;
+		showLeds();
+	}
+
+	for (int i = 0; i < 400; i++) {
+		delay(42-i/10);
+		leds[random(NUM_LEDS)].setHue(random(256));
+		showLeds();
+	}
+
+	for (int i = 0; i < 4000; i++) {
+		delay(2);
+		leds[random(NUM_LEDS)].setHue(random(256));
+		showLeds();
+	}
+
+	for (int i = 0; i < 30; i++) {
+		showLeds();
+		delay(20);
+		FastLED.showColor(CRGB::Black);
+		delay(80);
+	}
+
+	delay(6000);
+}
+
+void Leds::showLeds() {
+	unsigned long maxPower = 5000l;
+	unsigned int total = 0;
+
+	for (int i = 0; i < NUM_LEDS; i++) {
+		total += leds[i].r;
+		total += leds[i].g;
+		total += leds[i].b;
+	}
+
+	// Limit power!
+	if (total > maxPower) {
+		unsigned int scale = (maxPower * 100l) / (long)total;
+
+		unsigned int rScale;
+		unsigned int gScale;
+		unsigned int bScale;
+
+		for (int i = 0; i < NUM_LEDS; i++) {
+			rScale = leds[i].r * scale;
+			gScale = leds[i].g * scale;
+			bScale = leds[i].b * scale;
+
+			leds[i].r = rScale / 100;
+			leds[i].g = gScale / 100;
+			leds[i].b = bScale / 100;
+		}
+	}
 
 	FastLED.show();
 }

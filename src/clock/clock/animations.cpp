@@ -110,21 +110,17 @@ int fadeAllLeds(Leds *leds, int speed) {
 
 //--------------------------------------------------------------------------
 
-#define COLOUR_TIME_STEP 1
-#define COLOUR_COUNTDOWN 2000
-#define COLOUR_STEP 16
-
 boolean colour(Leds *leds, int frame) {
-	static int offset;
+	static uint8_t offset;
 	if(frame == 0) offset = 0;
 
-	if(frame % COLOUR_COUNTDOWN == 0) {
+	if(frame % 4 == 0) {
 		for(int i = 0; i < LED_WIDTH; i++) {
-			leds->leds[top[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
-			leds->leds[mid[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
-			leds->leds[bot[i]] = CHSV(offset + i*COLOUR_STEP, 255, 120);
+			leds->leds[top[i]] = CHSV(offset + i*8, 255, 120);
+			leds->leds[mid[i]] = CHSV(offset + i*8, 255, 120);
+			leds->leds[bot[i]] = CHSV(offset + i*8, 255, 120);
 		}
-		offset += COLOUR_TIME_STEP;
+		offset++;
 	}
 	FastLED.show();
 	return true;
@@ -133,33 +129,33 @@ boolean colour(Leds *leds, int frame) {
 //--------------------------------------------------------------------------
 
 #define BATSHITMODES 4
-#define BATSHITMODECHANGE 1000
+#define BATSHITMODECHANGE 560
 
 
 boolean batshit(Leds *leds, int frame) {
-	static int mode;
+	static int bsmode;
 	static int frameToChangeAt;
 	static int mode2progress;
 	static int currenthue;
 
 	if(frame == 0) {
-		mode = 0;
+		bsmode = random(BATSHITMODES);
 		frameToChangeAt = 0;
 	}
 
 	if(frame >= frameToChangeAt) {
-		frameToChangeAt = BATSHITMODECHANGE + (random(BATSHITMODECHANGE / 2) - BATSHITMODECHANGE / 4);
-		int currentMode = mode;
-		while(mode == currentMode) {
-			mode = random(BATSHITMODES);
+		frameToChangeAt = BATSHITMODECHANGE + random(BATSHITMODECHANGE / 4);
+		int currentMode = bsmode;
+		while(bsmode == currentMode) {
+			bsmode = random(BATSHITMODES);
 			mode2progress = -3;
 			currenthue = random(255);
 		}
 	}
 
-	switch(mode) {
+	switch(bsmode) {
 		case 0:
-			if(frame % 50 == 0) {
+			if(frame % 30 == 0) {
 				int hue = random(256);
 				for(int x = 0; x < LED_WIDTH; x++) {
 					if(x % 2 == 0) hue = random(256);
@@ -168,7 +164,7 @@ boolean batshit(Leds *leds, int frame) {
 			}
 			break;
 		case 1:
-			if(frame % 50 == 0) {
+			if(frame % 30 == 0) {
 				for(int y = 0; y < LED_HEIGHT; y++) {
 					int hue = random(256);
 					for(int x = 0; x < LED_WIDTH; x++) {
@@ -191,7 +187,8 @@ boolean batshit(Leds *leds, int frame) {
 			}
 			break;
 		case 3:
-			if(frame % 20 == 0) {
+			if(frame % 25 == 0) {
+				currenthue = random(255);
 				for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(currenthue, 255, 255);
 			} else {
 				fadeAllLeds(leds, 10);
@@ -296,7 +293,7 @@ boolean singlepulse_int(Leds *leds, int frame, boolean lowpower) {
 		: 0;
 
 	if(lowpower) {
-		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value / 3);
+		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, round((float)value / 1.5));
 	} else {
 		for(int i = 0; i < NUM_LEDS; i++) leds->leds[i] = CHSV(hue, 255, value);
 	}
