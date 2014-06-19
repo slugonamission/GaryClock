@@ -10,9 +10,9 @@
 
 uint8_t curTime[] = {0, 0, 0};
 
-uint8_t meterHoffset[12];
-uint8_t meterMoffset[60];
-uint8_t meterSoffset[60];
+uint8_t meterHoffset[] = {15,37,60,82,104,125,146,164,185,206,227,247};
+uint8_t meterMoffset[] = {9,14,18,23,27,32,37,41,46,50,55,60,64,69,73,78,82,87,91,96,100,104,108,112,116,120,124,128,132,136,140,144,148,152,156,161,165,169,173,177,181,185,188,192,195,199,202,206,209,213,216,220,224,227,231,235,239,243,246,250,254};
+uint8_t meterSoffset[] = {16,20,24,27,31,35,39,43,46,50,54,58,62,66,70,74,77,81,85,89,93,97,100,104,108,112,115,119,123,126,130,134,138,141,145,149,153,157,160,164,168,172,176,180,184,188,191,195,199,203,207,211,215,218,222,226,230,234,237,241};
 
 // 7-segment displays (left, middle, right)
 //SevenSeg segL = SevenSeg();
@@ -138,30 +138,6 @@ void setup() {
 
 	// Set up programmer
 	programmer.begin(PROG_ADDR);
-
-	// Set the offsets
-	// Precalc to save time. Also allows setting stupid offsets later.
-	for (int i = 0; i < 12; i++)
-	{
-		float tmp = 255.0f / 11.0f;
-		tmp = tmp * (float)i;
-		meterHoffset[i] = (uint8_t)tmp;
-	}
-
-	for (int i = 0; i < 60; i++)
-	{
-		float tmp = 255.0f / 59.0f;
-		tmp = tmp * (float)i;
-		meterMoffset[i] = (uint8_t)tmp;
-	}
-
-	for (int i = 0; i < 60; i++)
-	{
-		float tmp = 255.0f / 59.0f;
-		tmp = tmp * (float)i;
-		meterSoffset[i] = (uint8_t)tmp;
-	}
-	
 
 	// Test displays
 	//segL.print(1111, DEC);
