@@ -24,7 +24,7 @@ Voltmeter meterM = Voltmeter();
 Voltmeter meterS = Voltmeter();
 Voltmeter shitMeters[2];
 volatile int metersToUpdate = 0;
-int meterPositions[3];
+uint8_t meterPositions[3];
 
 Leds leds = Leds();
 

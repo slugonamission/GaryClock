@@ -13,11 +13,11 @@ class Voltmeter {
 	public:
 		Voltmeter(void);
 		void begin(int pin);
-		void move(int desiredPosition);
-		void moveDamped(int desiredPosition);
-		void moveDamped(int desiredPosition, int currentPosition);
-		static void moveMultipleDamped(Voltmeter meters[], int count, int desiredPosition);
-		static void moveMultipleDamped(Voltmeter meters[], int count, int desiredPositions[]);
+		void move(uint8_t desiredPosition);
+		void moveDamped(uint8_t desiredPosition);
+		void moveDamped(uint8_t desiredPosition, uint8_t currentPosition);
+		static void moveMultipleDamped(Voltmeter meters[], int count, uint8_t desiredPosition);
+		static void moveMultipleDamped(Voltmeter meters[], int count, uint8_t desiredPositions[]);
 		uint8_t getPosition(void) { return position; }
 	private:
 		uint8_t pwmPin;

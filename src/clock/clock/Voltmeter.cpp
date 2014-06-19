@@ -9,17 +9,17 @@ void Voltmeter::begin(int pin) {
 	pinMode(pwmPin, OUTPUT);
 }
 
-void Voltmeter::move(int desiredPosition)
+void Voltmeter::move(uint8_t desiredPosition)
 {
 	analogWrite(pwmPin, desiredPosition);
 	position = desiredPosition;
 }
 
-void Voltmeter::moveDamped(int desiredPosition) {
+void Voltmeter::moveDamped(uint8_t desiredPosition) {
 	moveDamped(desiredPosition, position);
 }
 
-void Voltmeter::moveDamped(int desiredPosition, int currentPosition) {
+void Voltmeter::moveDamped(uint8_t desiredPosition, uint8_t currentPosition) {
 	int damping = currentPosition - desiredPosition;
 
 	analogWrite(pwmPin, desiredPosition);
@@ -32,7 +32,7 @@ void Voltmeter::moveDamped(int desiredPosition, int currentPosition) {
 }
 
 
-void Voltmeter::moveMultipleDamped(Voltmeter meters[], int count, int desiredPosition) {
+void Voltmeter::moveMultipleDamped(Voltmeter meters[], int count, uint8_t desiredPosition) {
 	int damping[count];
 	for (int i = 0; i < count; i++)
 		damping[i] = meters[i].getPosition() - desiredPosition;
@@ -47,7 +47,7 @@ void Voltmeter::moveMultipleDamped(Voltmeter meters[], int count, int desiredPos
 		meters[i].move(desiredPosition);
 }
 
-void Voltmeter::moveMultipleDamped(Voltmeter meters[], int count, int desiredPositions[]) {
+void Voltmeter::moveMultipleDamped(Voltmeter meters[], int count, uint8_t desiredPositions[]) {
 	int damping[count];
 	for (int i = 0; i < count; i++)
 		damping[i] = meters[i].getPosition() - desiredPositions[i];
