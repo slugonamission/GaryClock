@@ -126,7 +126,6 @@ void Leds::errorAnimation() {
 
 
 void Leds::chargeNeutrinos(Voltmeter meters[]) {
-	randomSeed(micros());
 	uint8_t led;
 	uint8_t meterVals[3];
 

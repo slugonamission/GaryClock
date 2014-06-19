@@ -200,6 +200,9 @@ void setup() {
 	curTime[MINS] = minute(tz);
 	curTime[SECS] = second(tz);
 
+	long seed = second(tz) + 10 * minute(tz) + 100 * hour(tz) + 1000 * day(tz) + 10000 * month(tz) + 100000 * year(tz);
+	randomSeed(seed);
+
 	// Set the voltmeters
 	meterPositions[SECS] = meterSoffset[curTime[SECS]];
 	meterPositions[MINS] = meterMoffset[curTime[MINS]];
