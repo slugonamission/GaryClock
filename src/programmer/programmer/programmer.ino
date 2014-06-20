@@ -30,6 +30,7 @@
 #define I2CPTR_TIME 0
 #define I2CPTR_LEDS 1
 #define I2CPTR_STOPWORLD 2
+#define I2CPTR_NEUTRINO 3
 
 // I2C vars
 uint8_t i2c_regptr = 0;
@@ -295,6 +296,12 @@ void i2c_trans()
       else
         Wire.write((uint8_t)0);
       break;
+    case I2CPTR_NEUTRINO:
+      if(curPage == PAGE_UNDEFINED)
+        Wire.write((uint8_t)1);
+      else
+        Wire.write((uint8_t)0);
+      break;
   }
 }
 
@@ -547,8 +554,8 @@ void loopMenu()
        break;
        
      default:
-       printUndefinedHeader();
        curPage = PAGE_UNDEFINED;
+       printUndefinedHeader();
        break;
     }
   }
