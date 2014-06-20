@@ -1,5 +1,10 @@
-GaryClock
+Time Containment and Dispersal Unit
 =========
-This is the repo for Gary's troll clock.
+The structure of this repository is as follows:
 
-Please see the Google Doc you all have access to for more information at the moment.
+acrylic: Contains the Adobe Illustrator files for the plastic housing, and a template for the scales
+doc: Contains the (incomplete and abandoned) manual.
+libraries: Ignored
+notes: Misc stuff. Contains the programmer <-> clock I2C protocol.
+schematics: Contains the schematic for the power conditioning unit.
+src: Contains the actual clock source and tests.
