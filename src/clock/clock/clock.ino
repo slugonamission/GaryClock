@@ -26,11 +26,15 @@ Voltmeter shitMeters[2];
 volatile int metersToUpdate = 0;
 uint8_t meterPositions[3];
 
+int hoursSinceNeutrinos;
+
 Leds leds = Leds();
 
 Programmer programmer = Programmer();
 bool gotProgrammer = 0;
 bool stopWorld = 0;
+bool wasCharging = 0;
+bool charging = 0;
 
 // This is to allow the programmer loop to be able to skip iterations. This is because if each iteration
 // of loop() caused an I2C transaction, the programmer would basically stop due to the number of incoming
@@ -112,6 +116,45 @@ ISR(TIMER2_COMPA_vect) {
 	animation_tick(&leds);
 }
 
+void maybeChargeNeutrinos() {
+	if (random(NEUTRINOS_PROB) == 0 || hoursSinceNeutrinos > NEUTRINOS_PROB) {
+		hoursSinceNeutrinos = 0;
+		chargeNeutrinos();
+	}
+	else {
+		hoursSinceNeutrinos++;
+	}
+}
+
+void chargeNeutrinos() {
+	// Disable interrupts
+	detachInterrupt(RTC_INT);
+	TIMSK2 &= ~(1 << OCIE2A);
+
+	Voltmeter allMeters[] = {meterM, meterS, meterH};
+	leds.chargeNeutrinos(allMeters);
+
+	setTimeFromRTC();
+
+	// Re-enable interrupts
+	attachInterrupt(RTC_INT, rtcTick, RISING);
+	TIMSK2 |= (1 << OCIE2A);
+}
+
+void setTimeFromRTC() {
+	time_t tz = RTC.get(); 
+	curTime[HOUR] = hour(tz);
+	curTime[MINS] = minute(tz);
+	curTime[SECS] = second(tz);
+
+	// Set the voltmeters
+	meterPositions[SECS] = meterSoffset[curTime[SECS]];
+	meterPositions[MINS] = meterMoffset[curTime[MINS]];
+	meterPositions[HOUR] = meterHoffset[makeMeterTime(curTime[HOUR])];
+	meterH.move(meterPositions[HOUR]);
+	Voltmeter::moveMultipleDamped(shitMeters, 2, meterPositions);
+}
+
 
 void setup() {
 	// Sanity delay
@@ -167,8 +210,6 @@ void setup() {
 
 	// Test LEDs
 	leds.introAnimation();
-	//Voltmeter allMeters[] = {meterM, meterS, meterH};
-	//leds.chargeNeutrinos(allMeters);
 
 	// Attach timer2 interrupt for animation frames (100Hz)
 	set_animation(&leds, -1);
@@ -199,24 +240,15 @@ void setup() {
 	//delay(500);	
 
 	// Get the current time from RTC
-	time_t tz = RTC.get(); 
-	curTime[HOUR] = hour(tz);
-	curTime[MINS] = minute(tz);
-	curTime[SECS] = second(tz);
+	setTimeFromRTC();
 
+	time_t tz = RTC.get(); 
 	long seed = second(tz) + 10 * minute(tz) + 100 * hour(tz) + 1000 * day(tz) + 10000 * month(tz) + 100000 * year(tz);
 	randomSeed(seed);
 
-	// Set the voltmeters
-	meterPositions[SECS] = meterSoffset[curTime[SECS]];
-	meterPositions[MINS] = meterMoffset[curTime[MINS]];
-	meterPositions[HOUR] = meterHoffset[makeMeterTime(curTime[HOUR])];
-	meterH.move(meterPositions[HOUR]);
-	Voltmeter::moveMultipleDamped(shitMeters, 2, meterPositions);
-
 	// Set the RTC interrupt callback
-	pinMode(2, INPUT_PULLUP);
-	attachInterrupt(0, rtcTick, RISING);
+	pinMode(RTC_PIN, INPUT_PULLUP);
+	attachInterrupt(RTC_INT, rtcTick, RISING);
 
 	// Enable the 1Hz oscillator
 	if(!RTC.setTickMode(true))
@@ -225,6 +257,10 @@ void setup() {
 
 
 void loop() {
+	// Maybe charge some neutrinos
+	if (metersToUpdate == 3)
+		maybeChargeNeutrinos();
+
 	// Update Voltmeters here so we can use delays to debounce
 	if (metersToUpdate > 0 && !stopWorld) {
 		if (metersToUpdate == 3) {
@@ -241,6 +277,8 @@ void loop() {
 	programmerLoopSkip = PROGRAMMER_SKIP_NUM;
 
 	stopWorld = programmer.worldStop();
+	wasCharging = charging;
+	charging = programmer.neutrinosTime();
 
 	if (!gotProgrammer && programmer.exists())
 	{
@@ -268,6 +306,9 @@ void loop() {
 			meterH.move(meterPositions[HOUR]);
 			Voltmeter::moveMultipleDamped(shitMeters, 2, meterPositions);
 			metersToUpdate = 0;
+		}
+		else if (charging && !wasCharging) {
+			chargeNeutrinos();
 		}
 		else if (programmer.getLedMode(&nextLed)) // Only need to do this if the world isn't stopped, hence there's a chance the user is on the LED page.
 		{
