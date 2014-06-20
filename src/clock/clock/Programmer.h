@@ -14,6 +14,7 @@ class Programmer {
 		bool setLedMode(uint8_t mode);
 		bool getLedMode(uint8_t *mode);
 		bool worldStop(void);
+		bool neutrinosTime(void);
 
 	private:
 		uint8_t i2c_addr;

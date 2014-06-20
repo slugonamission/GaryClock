@@ -4,6 +4,7 @@
 #define TIME_REG 0
 #define LED_REG 1
 #define STOP_REG 2
+#define NEUTRINOS_REG 3
 
 Programmer::Programmer() {
 
@@ -94,5 +95,19 @@ bool Programmer::worldStop()
   return mode;
 }
 
-
+bool Programmer::neutrinosTime()
+{
+  uint8_t mode = 0;
+  Wire.beginTransmission(i2c_addr);
+  Wire.write((uint8_t)NEUTRINOS_REG);
+  if(Wire.endTransmission() != 0)
+    return false;
+  
+  Wire.requestFrom((uint8_t)i2c_addr, (uint8_t)1);
+  if (Wire.available() < 1) return false;
+  
+  mode = Wire.read();
+  
+  return mode;
+}
 
