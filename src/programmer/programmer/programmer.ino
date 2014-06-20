@@ -905,10 +905,21 @@ void loopCredits()
     case 4:
       drawPBM("fp7.pbm", 104, 128, 28, 0);
       break;
-  
+    case 5:
+      drawPBM("gary1.pbm", 156, 128, 2, 0);
+      break;
+    case 6:
+      drawPBM("gary2.pbm", 136, 128, 12, 0);
+      break;
+    case 7:
+      drawPBM("gary3.pbm", 133, 128, 13, 0);
+      break;
+    case 8:
+      drawPBM("gary4.pbm", 137, 128, 12, 0);
+      break;
   }  
   
-  if(creditsIdx > 4)
+  if(creditsIdx > 8)
     creditsIdx = 0;
   
   if(dir == JOY_LEFT)
@@ -1040,6 +1051,26 @@ void loopQuiz()
 // -------------------------------------------------------
 void printUndefinedHeader()
 {
+  tft.fillScreen(TEXTBG);
+  int d = 500;
+  
+  // Noise it
+  for(int i = 0; i < 22000; i++)
+  {
+    tft.drawPixel(random() % 160, random() % 128, random() % 0xFFFF);
+    
+    if(i % 20 == 0 && d != 0)
+      d -= 100;
+    
+    delay(d);
+  }
+  
+  for(int i = 1; i <= 100; i++)
+  {
+    tft.invertDisplay(i % 2);
+    delay(50);
+  }
+  
   tft.fillScreen(TEXTBG);
   
   tft.setCursor(50, 0);
