@@ -736,8 +736,14 @@ void printBrightnessHeader()
   tft.setCursor(50, 0);
   tft.println("Brightness");
   tft.drawFastHLine(0, 10, 160, SELTEXTBG);
-  tft.setCursor(0, 15);
-  tft.println(curBrightness);
+  tft.setCursor(50, 15);
+  tft.setTextSize(3);
+    if(curBrightness < 100)
+      tft.print('0');
+    if(curBrightness < 10)
+      tft.print('0');
+    tft.print(curBrightness);
+    tft.setTextSize(1);
 }
 
 void loopBrightness()
@@ -745,17 +751,29 @@ void loopBrightness()
   char dir = getJoyDir();
   if(dir == JOY_UP)
   {
-    curBrightness += 10;
+    curBrightness += 5;
     analogWrite(TFT_BACKLIGHT, curBrightness);
-    tft.setCursor(0, 15);
-    tft.println(curBrightness);
+    tft.setCursor(50, 15);
+    tft.setTextSize(3);
+    if(curBrightness < 100)
+      tft.print('0');
+    if(curBrightness < 10)
+      tft.print('0');
+    tft.print(curBrightness);
+    tft.setTextSize(1);
   }
   else if(dir == JOY_DOWN)
   {
-    curBrightness -= 10;
+    curBrightness -= 5;
     analogWrite(TFT_BACKLIGHT, curBrightness);
-    tft.setCursor(0, 15);
-    tft.println(curBrightness);
+    tft.setCursor(50, 15);
+    tft.setTextSize(3);
+    if(curBrightness < 100)
+      tft.print('0');
+    if(curBrightness < 10)
+      tft.print('0');
+    tft.print(curBrightness);
+    tft.setTextSize(1);
   }
   else if(dir == JOY_LEFT)
   {
@@ -884,9 +902,13 @@ void loopCredits()
     case 3:
       drawPBM("xilinx.pbm", 160, 47, 0, 40);
       break;
+    case 4:
+      drawPBM("fp7.pbm", 104, 128, 28, 0);
+      break;
+  
   }  
   
-  if(creditsIdx > 3)
+  if(creditsIdx > 4)
     creditsIdx = 0;
   
   if(dir == JOY_LEFT)
